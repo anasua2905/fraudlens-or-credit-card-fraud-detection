@@ -1,0 +1,19 @@
+# Data never goes into git (the raw files are ~500 MB)
+data/raw/*
+data/silver/*
+data/gold/*
+!data/**/.gitkeep
+reports/*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets
+.env
+kaggle.json

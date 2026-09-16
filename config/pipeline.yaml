@@ -1,0 +1,37 @@
+# Pipeline configuration for the Sparkov credit card fraud dataset.
+# All paths are relative to the project root.
+
+dataset:
+  kaggle_slug: kartik2112/fraud-detection
+  files:
+    train: fraudTrain.csv
+    test: fraudTest.csv
+
+paths:
+  raw: data/raw          # bronze: untouched source files + manifest
+  silver: data/silver    # cleaned, typed, PII-reduced transactions
+  gold: data/gold        # model-ready feature tables + dashboard table
+  reports: reports       # validation and profiling reports
+
+split:
+  # Kaggle's fraudTest.csv already continues fraudTrain.csv in time.
+  # We carve the last N weeks of fraudTrain.csv out as a validation set.
+  validation_weeks: 6
+
+features:
+  # Rolling per-card windows (label: seconds). Only PRIOR transactions count.
+  velocity_windows:
+    1h: 3600
+    24h: 86400
+    7d: 604800
+  night_hours: [22, 23, 0, 1, 2, 3]
+
+privacy:
+  # Direct identifiers removed in the silver layer.
+  drop_columns: [first, last, street]
+  # cc_num is replaced by a salted SHA-256 card_id.
+  # Set the salt via this environment variable; a default is used otherwise.
+  hash_salt_env: CARD_HASH_SALT
+
+storage:
+  format: parquet        # falls back to csv if pyarrow is not installed
