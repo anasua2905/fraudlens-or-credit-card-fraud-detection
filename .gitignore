@@ -1,3 +1,24 @@
+<<<<<<< HEAD
+# Data never goes into git (the raw files are ~500 MB)
+data/raw/*
+data/silver/*
+data/gold/*
+!data/**/.gitkeep
+reports/*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Secrets
+.env
+kaggle.json
+=======
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -216,3 +237,4 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+>>>>>>> eae1788c3986d3e8808d4b265335ea779290c7bf
