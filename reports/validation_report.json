@@ -1,0 +1,214 @@
+[
+  {
+    "dataset": "fraudTrain.csv",
+    "status": "WARN",
+    "profile": {
+      "rows": 1296675,
+      "columns": 23,
+      "fraud_count": 7506,
+      "fraud_rate_pct": 0.5789
+    },
+    "checks": [
+      {
+        "check": "required_columns_present",
+        "status": "PASS",
+        "detail": {
+          "missing": []
+        }
+      },
+      {
+        "check": "no_unexpected_columns",
+        "status": "PASS",
+        "detail": {
+          "extra": []
+        }
+      },
+      {
+        "check": "critical_columns_not_null",
+        "status": "PASS",
+        "detail": {}
+      },
+      {
+        "check": "timestamps_parseable",
+        "status": "PASS",
+        "detail": {
+          "unparseable": 0,
+          "min": "2019-01-01T00:00:18",
+          "max": "2020-06-21T12:13:37"
+        }
+      },
+      {
+        "check": "dob_parseable_and_before_txn",
+        "status": "PASS",
+        "detail": {
+          "unparseable": 0
+        }
+      },
+      {
+        "check": "amount_positive",
+        "status": "PASS",
+        "detail": {
+          "non_positive": 0,
+          "min": 1.0,
+          "max": 28948.9
+        }
+      },
+      {
+        "check": "coordinates_in_range",
+        "status": "PASS",
+        "detail": {
+          "out_of_range_rows": 0
+        }
+      },
+      {
+        "check": "label_is_binary",
+        "status": "PASS",
+        "detail": {
+          "values": [
+            0,
+            1
+          ]
+        }
+      },
+      {
+        "check": "gender_values_known",
+        "status": "PASS",
+        "detail": {
+          "values": [
+            "F",
+            "M"
+          ]
+        }
+      },
+      {
+        "check": "categories_known",
+        "status": "PASS",
+        "detail": {
+          "unknown": []
+        }
+      },
+      {
+        "check": "transaction_id_unique",
+        "status": "PASS",
+        "detail": {
+          "duplicates": 0
+        }
+      },
+      {
+        "check": "unix_time_consistent_with_timestamp",
+        "status": "WARN",
+        "detail": {
+          "distinct_offsets_seconds": 2,
+          "example_offset_days": 2556.0,
+          "action": "unix_time ignored; epoch derived from trans_date_trans_time"
+        }
+      }
+    ]
+  },
+  {
+    "dataset": "fraudTest.csv",
+    "status": "WARN",
+    "profile": {
+      "rows": 555719,
+      "columns": 23,
+      "fraud_count": 2145,
+      "fraud_rate_pct": 0.386
+    },
+    "checks": [
+      {
+        "check": "required_columns_present",
+        "status": "PASS",
+        "detail": {
+          "missing": []
+        }
+      },
+      {
+        "check": "no_unexpected_columns",
+        "status": "PASS",
+        "detail": {
+          "extra": []
+        }
+      },
+      {
+        "check": "critical_columns_not_null",
+        "status": "PASS",
+        "detail": {}
+      },
+      {
+        "check": "timestamps_parseable",
+        "status": "PASS",
+        "detail": {
+          "unparseable": 0,
+          "min": "2020-06-21T12:14:25",
+          "max": "2020-12-31T23:59:34"
+        }
+      },
+      {
+        "check": "dob_parseable_and_before_txn",
+        "status": "PASS",
+        "detail": {
+          "unparseable": 0
+        }
+      },
+      {
+        "check": "amount_positive",
+        "status": "PASS",
+        "detail": {
+          "non_positive": 0,
+          "min": 1.0,
+          "max": 22768.11
+        }
+      },
+      {
+        "check": "coordinates_in_range",
+        "status": "PASS",
+        "detail": {
+          "out_of_range_rows": 0
+        }
+      },
+      {
+        "check": "label_is_binary",
+        "status": "PASS",
+        "detail": {
+          "values": [
+            0,
+            1
+          ]
+        }
+      },
+      {
+        "check": "gender_values_known",
+        "status": "PASS",
+        "detail": {
+          "values": [
+            "F",
+            "M"
+          ]
+        }
+      },
+      {
+        "check": "categories_known",
+        "status": "PASS",
+        "detail": {
+          "unknown": []
+        }
+      },
+      {
+        "check": "transaction_id_unique",
+        "status": "PASS",
+        "detail": {
+          "duplicates": 0
+        }
+      },
+      {
+        "check": "unix_time_consistent_with_timestamp",
+        "status": "WARN",
+        "detail": {
+          "distinct_offsets_seconds": 1,
+          "example_offset_days": 2557.0,
+          "action": "unix_time ignored; epoch derived from trans_date_trans_time"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,109 @@
+{
+  "manifest": {
+    "source": "kaggle",
+    "ingested_at_utc": "2026-09-16T13:54:06.519273+00:00",
+    "files": {
+      "train": {
+        "file": "fraudTrain.csv",
+        "bytes": 351238196,
+        "rows": 1296675,
+        "sha256": "fd7139200dbfcbed0b6742bbe05a4f1abce532c4fef20918228a651647a3e75d"
+      },
+      "test": {
+        "file": "fraudTest.csv",
+        "bytes": 150354339,
+        "rows": 555719,
+        "sha256": "12d553ab19440c752d2531ee1af44bb64f12cc3d3839f1649f19e81c230545f0"
+      }
+    }
+  },
+  "cleaning": [
+    {
+      "source_split": "train",
+      "rows_in": 1296675,
+      "duplicates_removed": 0,
+      "invalid_rows_removed": 0,
+      "rows_out": 1296675
+    },
+    {
+      "source_split": "test",
+      "rows_in": 555719,
+      "duplicates_removed": 0,
+      "invalid_rows_removed": 0,
+      "rows_out": 555719
+    }
+  ],
+  "silver_path": "D:\\AUS\\CDU\\MDS\\Semester-3\\PRT661\\A2\\fraud-detection\\data\\silver\\transactions.parquet",
+  "split": {
+    "validation_cutoff": "2020-05-10T12:13:37",
+    "splits": {
+      "train": {
+        "rows": 1185094,
+        "start": "2019-01-01T00:00:18",
+        "end": "2020-05-10T12:13:21",
+        "fraud_count": 6837,
+        "fraud_rate_pct": 0.5769,
+        "cards": 978
+      },
+      "val": {
+        "rows": 111581,
+        "start": "2020-05-10T12:13:54",
+        "end": "2020-06-21T12:13:37",
+        "fraud_count": 669,
+        "fraud_rate_pct": 0.5996,
+        "cards": 914
+      },
+      "test": {
+        "rows": 555719,
+        "start": "2020-06-21T12:14:25",
+        "end": "2020-12-31T23:59:34",
+        "fraud_count": 2145,
+        "fraud_rate_pct": 0.386,
+        "cards": 924
+      }
+    },
+    "test_starts_after_val": true
+  },
+  "gold_outputs": {
+    "train": "D:\\AUS\\CDU\\MDS\\Semester-3\\PRT661\\A2\\fraud-detection\\data\\gold\\features_train.parquet",
+    "val": "D:\\AUS\\CDU\\MDS\\Semester-3\\PRT661\\A2\\fraud-detection\\data\\gold\\features_val.parquet",
+    "test": "D:\\AUS\\CDU\\MDS\\Semester-3\\PRT661\\A2\\fraud-detection\\data\\gold\\features_test.parquet",
+    "dashboard": "D:\\AUS\\CDU\\MDS\\Semester-3\\PRT661\\A2\\fraud-detection\\data\\gold\\dashboard_transactions.parquet"
+  },
+  "feature_columns": {
+    "numeric": [
+      "amount",
+      "log_amount",
+      "hour",
+      "day_of_week",
+      "is_weekend",
+      "is_night",
+      "age",
+      "log_city_pop",
+      "distance_km",
+      "card_prior_txn_count",
+      "secs_since_last_txn",
+      "amt_to_card_mean",
+      "amt_zscore_card",
+      "is_new_merchant_for_card",
+      "card_prior_category_count",
+      "txn_count_1h",
+      "amt_sum_1h",
+      "txn_count_24h",
+      "amt_sum_24h",
+      "txn_count_7d",
+      "amt_sum_7d"
+    ],
+    "categorical": [
+      "category",
+      "gender"
+    ],
+    "label": "is_fraud"
+  },
+  "feature_null_rates_pct": {
+    "secs_since_last_txn": 0.054,
+    "amt_to_card_mean": 0.054,
+    "amt_zscore_card": 0.108
+  },
+  "runtime_seconds": 106.3
+}

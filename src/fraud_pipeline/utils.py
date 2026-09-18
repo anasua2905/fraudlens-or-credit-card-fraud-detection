@@ -29,6 +29,12 @@ def load_config(path: str | Path | None = None, root: str | Path | None = None) 
     path = Path(path) if path else root / "config" / "pipeline.yaml"
     with open(path) as fh:
         cfg = yaml.safe_load(fh)
+    # Defaults keep older config files working after new steps are added
+    defaults = {"figures": "reports/figures", "processed": "data/processed", "artifacts": "artifacts"}
+    for k, v in defaults.items():
+        cfg["paths"].setdefault(k, v)
+    cfg.setdefault("eda", {"sample_rows": 300000, "min_state_txns": 5000,
+                           "corr_threshold": 0.85, "near_duplicate_seconds": 60})
     cfg["paths"] = {k: (root / v).resolve() for k, v in cfg["paths"].items()}
     for p in cfg["paths"].values():
         p.mkdir(parents=True, exist_ok=True)
@@ -61,7 +67,10 @@ def read_table(path_without_suffix: Path) -> pd.DataFrame:
     if pq.exists():
         return pd.read_parquet(pq)
     if csv.exists():
-        return pd.read_csv(csv, parse_dates=["ts"])
+        df = pd.read_csv(csv)
+        if "ts" in df:
+            df["ts"] = pd.to_datetime(df["ts"])
+        return df
     raise FileNotFoundError(f"No table found at {pq} or {csv}")
 
 

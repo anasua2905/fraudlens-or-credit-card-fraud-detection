@@ -1,0 +1,195 @@
+{
+  "fit_on": "train",
+  "class_counts_train": {
+    "legit": 1178257,
+    "fraud": 6837
+  },
+  "suggested_scale_pos_weight": 172.3,
+  "excluded_features": [
+    "card_prior_txn_count",
+    "card_prior_category_count",
+    "distance_km",
+    "is_new_merchant_for_card"
+  ],
+  "added_features": [
+    "category_share_card"
+  ],
+  "validation_drift_psi": {
+    "amount": {
+      "psi": 0.0001,
+      "flag": "stable"
+    },
+    "log_amount": {
+      "psi": 0.0001,
+      "flag": "stable"
+    },
+    "hour": {
+      "psi": 0.0,
+      "flag": "stable"
+    },
+    "day_of_week": {
+      "psi": 0.0562,
+      "flag": "stable"
+    },
+    "is_weekend": {
+      "psi": 0.0198,
+      "flag": "stable"
+    },
+    "is_night": {
+      "psi": 0.0,
+      "flag": "stable"
+    },
+    "age": {
+      "psi": 0.005,
+      "flag": "stable"
+    },
+    "log_city_pop": {
+      "psi": 0.0001,
+      "flag": "stable"
+    },
+    "secs_since_last_txn": {
+      "psi": 0.0045,
+      "flag": "stable"
+    },
+    "amt_to_card_mean": {
+      "psi": 0.0007,
+      "flag": "stable"
+    },
+    "amt_zscore_card": {
+      "psi": 0.0385,
+      "flag": "stable"
+    },
+    "txn_count_1h": {
+      "psi": 0.0003,
+      "flag": "stable"
+    },
+    "amt_sum_1h": {
+      "psi": 0.0002,
+      "flag": "stable"
+    },
+    "txn_count_24h": {
+      "psi": 0.0096,
+      "flag": "stable"
+    },
+    "amt_sum_24h": {
+      "psi": 0.0066,
+      "flag": "stable"
+    },
+    "txn_count_7d": {
+      "psi": 0.0306,
+      "flag": "stable"
+    },
+    "amt_sum_7d": {
+      "psi": 0.0149,
+      "flag": "stable"
+    },
+    "category_share_card": {
+      "psi": 0.0199,
+      "flag": "stable"
+    }
+  },
+  "views": {
+    "linear": {
+      "n_features": 39,
+      "feature_names": [
+        "secs_since_last_txn",
+        "amt_to_card_mean",
+        "txn_count_1h",
+        "txn_count_24h",
+        "txn_count_7d",
+        "amt_sum_1h",
+        "amt_sum_24h",
+        "amt_sum_7d",
+        "missingindicator_secs_since_last_txn",
+        "missingindicator_amt_to_card_mean",
+        "amt_zscore_card",
+        "missingindicator_amt_zscore_card",
+        "category_share_card",
+        "missingindicator_category_share_card",
+        "log_amount",
+        "age",
+        "log_city_pop",
+        "hour_sin",
+        "hour_cos",
+        "day_of_week_sin",
+        "day_of_week_cos",
+        "is_weekend",
+        "is_night",
+        "category_entertainment",
+        "category_food_dining",
+        "category_gas_transport",
+        "category_grocery_net",
+        "category_grocery_pos",
+        "category_health_fitness",
+        "category_home",
+        "category_kids_pets",
+        "category_misc_net",
+        "category_misc_pos",
+        "category_personal_care",
+        "category_shopping_net",
+        "category_shopping_pos",
+        "category_travel",
+        "gender_F",
+        "gender_M"
+      ],
+      "splits": {
+        "train": {
+          "rows": 1185094,
+          "nan_cells": 0
+        },
+        "val": {
+          "rows": 111581,
+          "nan_cells": 0
+        },
+        "test": {
+          "rows": 555719,
+          "nan_cells": 0
+        }
+      },
+      "train_scaled_mean_abs_max": 0.0,
+      "train_scaled_std_range": [
+        1.0,
+        1.0
+      ]
+    },
+    "tree": {
+      "n_features": 20,
+      "feature_names": [
+        "amount",
+        "log_amount",
+        "hour",
+        "day_of_week",
+        "is_weekend",
+        "is_night",
+        "age",
+        "log_city_pop",
+        "secs_since_last_txn",
+        "amt_to_card_mean",
+        "amt_zscore_card",
+        "txn_count_1h",
+        "amt_sum_1h",
+        "txn_count_24h",
+        "amt_sum_24h",
+        "txn_count_7d",
+        "amt_sum_7d",
+        "category_share_card",
+        "category",
+        "gender"
+      ],
+      "splits": {
+        "train": {
+          "rows": 1185094,
+          "nan_cells": 4890
+        },
+        "val": {
+          "rows": 111581,
+          "nan_cells": 25
+        },
+        "test": {
+          "rows": 555719,
+          "nan_cells": 80
+        }
+      }
+    }
+  }
+}

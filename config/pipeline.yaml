@@ -12,6 +12,9 @@ paths:
   silver: data/silver    # cleaned, typed, PII-reduced transactions
   gold: data/gold        # model-ready feature tables + dashboard table
   reports: reports       # validation and profiling reports
+  figures: reports/figures      # EDA charts (Step 3)
+  processed: data/processed     # model-ready matrices (Step 3)
+  artifacts: artifacts          # fitted preprocessors (Step 3)
 
 split:
   # Kaggle's fraudTest.csv already continues fraudTrain.csv in time.
@@ -35,3 +38,42 @@ privacy:
 
 storage:
   format: parquet        # falls back to csv if pyarrow is not installed
+
+# ---------------- Step 3: cleaning audit, EDA, preprocessing ----------------
+eda:
+  sample_rows: 300000      # rows sampled for correlation / signal ranking
+  min_state_txns: 5000     # ignore states with fewer training transactions
+  corr_threshold: 0.85     # flag feature pairs above this |Spearman rho|
+  near_duplicate_seconds: 60
+
+preprocess:
+  winsor_quantiles: [0.001, 0.999]   # clipping for scale-sensitive models only
+  save_matrices: true
+  # Left out of the model matrices. Running totals only ever grow, so later
+  # periods contain values never seen in training. Review
+  # reports/preprocessing_report.json -> validation_drift_psi before adding more.
+  exclude_features:
+    - card_prior_txn_count      # running total: grows over time
+    - card_prior_category_count # running total: grows over time
+    - distance_km               # no signal (AUC 0.502): merchant location is random
+    - is_new_merchant_for_card  # drifts (validation PSI 0.39) and weak (AUC 0.58)
+
+# ---------------- Step 4: model development ----------------
+model:
+  random_state: 42
+  # Available: logistic, hist_gb, isolation_forest, hybrid_gb, mlp
+  # mlp is a neural net; it is slow, so it is off by default.
+  models: [logistic, hist_gb, isolation_forest, hybrid_gb]
+  max_train_rows: null        # set e.g. 200000 for a fast trial run
+  mlp_max_train_rows: 300000  # the neural net trains on a stratified subsample
+  isolation_forest:
+    n_estimators: 200
+    max_samples: 256          # standard setting; keeps it fast on millions of rows
+  permutation_importance_rows: 50000
+
+  threshold:
+    # Thresholds are chosen on VALIDATION and applied once to test.
+    primary: min_cost         # max_f1 | alert_budget | min_cost
+    alerts_per_day: 50        # for the alert_budget strategy
+    investigation_cost: 15    # cost of reviewing one alert
+    recovery_rate: 0.9        # share of a caught fraud's amount that is saved
