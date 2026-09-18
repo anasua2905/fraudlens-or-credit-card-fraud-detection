@@ -171,8 +171,16 @@ artifacts/                      fitted preprocessors (.joblib)
 
 ## Roadmap
 
-- [x] Step 1: Data pipeline and data engineering
-- [x] Step 3: Data cleaning, preprocessing and EDA
+- [x] Update System Architecture
+- [x] Data Acquisition and Storage
+- [x] Data Pipeline Design and Data Engineering
+- [x] Data cleaning, Data Preprocessing and EDA
 - [x] Modelling (baselines, gradient boosting, anomaly detectors, threshold tuning)
-- [ ] Monitoring dashboard
+- [x] Implementation Progress
+- [x] Project Governance
+- [x] Risk Analysis
+- [x] Ethics, Privacy and Security Considerations
+- [x] Updated workflow
+- [ ] Monitoring dashboard and Visualisation
+- [ ] Valuation of progress
 - [ ] Reporting and decision support
