@@ -1,0 +1,23 @@
+{
+  "stages_run": [
+    "ingest",
+    "quality",
+    "eda",
+    "preprocess",
+    "train",
+    "score",
+    "verify"
+  ],
+  "seconds": {
+    "ingest": 61.0,
+    "quality": 12.9,
+    "eda": 32.9,
+    "preprocess": 22.8,
+    "train": 286.1,
+    "score": 13.5,
+    "verify": 23.2
+  },
+  "total_seconds": 452.4,
+  "champion": "hist_gb",
+  "verification": "PASS"
+}

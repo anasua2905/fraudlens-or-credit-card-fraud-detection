@@ -19,6 +19,7 @@ from sklearn.inspection import permutation_importance
 
 from . import evaluate as E
 from . import models as M
+from .selection import DEFAULT_COMPLEXITY_ORDER, select_champion
 from .datasets import load_analysis_frame, load_features
 from .eda import FRAUD_COLOR, LEGIT_COLOR, save_figure
 from .utils import get_logger, load_config, read_table, write_json
@@ -307,6 +308,20 @@ def error_breakdown(cfg: dict, model_name: str, split: str, threshold: float) ->
     }
 
 
+def imbalance_summary(fitted: dict) -> dict:
+    """Record how each fitted model actually handled class imbalance (read from the objects)."""
+    out = {}
+    for name, model in fitted.items():
+        cw = getattr(model, "class_weight", None)
+        if name == "isolation_forest":
+            out[name] = "none needed: unsupervised, fitted on legitimate transactions only"
+        elif name == "mlp":
+            out[name] = "fraud oversampled 1:10 in the neural net's training sample only"
+        else:
+            out[name] = f"class_weight={cw!r}; no resampling"
+    return out
+
+
 # ------------------------------------------------------------------- runner
 def run_training(cfg: dict) -> dict:
     t0 = time.perf_counter()
@@ -319,9 +334,20 @@ def run_training(cfg: dict) -> dict:
     results = evaluate_models(cfg, views, trained["scores"])
     table = comparison_table(results)
 
-    supervised = [m for m in table.index if m in M.SUPERVISED]
-    champion = supervised[0] if supervised else table.index[0]
-    log.info("Champion by validation PR-AUC: %s", champion)
+    # Champion: explicit rule in selection.py (validation data only)
+    sup = [m for m in trained["scores"] if m in M.SUPERVISED]
+    y_val = views[M.VIEW_BY_MODEL[sup[0]]]["val"]["y"]
+    selection = select_champion(
+        y_val,
+        {m: trained["scores"][m]["val"] for m in sup},
+        {m: results[m]["validation"]["pr_auc"] for m in sup},
+        complexity_order=mcfg.get("complexity_order", DEFAULT_COMPLEXITY_ORDER),
+        n_boot=mcfg.get("selection_bootstrap", 500),
+        seed=mcfg["random_state"],
+        margin=mcfg.get("selection_margin", 0.01),
+    )
+    champion = selection["champion"]
+    log.info("Champion: %s | %s", champion, selection["reason"])
 
     # Figures
     save_figure(plot_pr_curves(views, trained["scores"], "test"), cfg, "10_pr_curves_test")
@@ -345,6 +371,8 @@ def run_training(cfg: dict) -> dict:
     report = {
         "protocol": "fit on train; model and thresholds chosen on validation; test scored once",
         "champion": champion,
+        "selection": selection,
+        "imbalance_handling": imbalance_summary(trained["fitted"]),
         "threshold_strategy": tcfg["primary"],
         "comparison": table.reset_index().to_dict("records"),
         "results": results,

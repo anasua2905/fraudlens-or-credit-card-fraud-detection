@@ -1,0 +1,362 @@
+{
+  "status": "PASS",
+  "passed": 48,
+  "failed": 0,
+  "champion": "hist_gb",
+  "checks": [
+    {
+      "stage": "ingestion",
+      "check": "fraudTrain.csv checksum matches manifest",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "ingestion",
+      "check": "fraudTest.csv checksum matches manifest",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "cleaning",
+      "check": "silver rows = manifest rows (nothing lost)",
+      "status": "PASS",
+      "detail": {
+        "manifest": 1852394,
+        "silver": 1852394
+      }
+    },
+    {
+      "stage": "cleaning",
+      "check": "no identifying columns in silver",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "splitting",
+      "check": "split rows sum to silver rows",
+      "status": "PASS",
+      "detail": {
+        "train": 1185094,
+        "val": 111581,
+        "test": 555719
+      }
+    },
+    {
+      "stage": "splitting",
+      "check": "no transaction appears in two splits",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "splitting",
+      "check": "splits are chronological (train < val < test)",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "features",
+      "check": "no feature is derived from the label",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "preprocessing",
+      "check": "linear/train: matrix rows = feature-table rows",
+      "status": "PASS",
+      "detail": {
+        "matrix": 1185094,
+        "features": 1185094
+      }
+    },
+    {
+      "stage": "preprocessing",
+      "check": "linear/train: columns = fitted preprocessor output",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "preprocessing",
+      "check": "linear: same row order as feature table",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "preprocessing",
+      "check": "linear/val: matrix rows = feature-table rows",
+      "status": "PASS",
+      "detail": {
+        "matrix": 111581,
+        "features": 111581
+      }
+    },
+    {
+      "stage": "preprocessing",
+      "check": "linear/val: columns = fitted preprocessor output",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "preprocessing",
+      "check": "linear/test: matrix rows = feature-table rows",
+      "status": "PASS",
+      "detail": {
+        "matrix": 555719,
+        "features": 555719
+      }
+    },
+    {
+      "stage": "preprocessing",
+      "check": "linear/test: columns = fitted preprocessor output",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "preprocessing",
+      "check": "linear: excluded features absent",
+      "status": "PASS",
+      "detail": []
+    },
+    {
+      "stage": "preprocessing",
+      "check": "tree/train: matrix rows = feature-table rows",
+      "status": "PASS",
+      "detail": {
+        "matrix": 1185094,
+        "features": 1185094
+      }
+    },
+    {
+      "stage": "preprocessing",
+      "check": "tree/train: columns = fitted preprocessor output",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "preprocessing",
+      "check": "tree: same row order as feature table",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "preprocessing",
+      "check": "tree/val: matrix rows = feature-table rows",
+      "status": "PASS",
+      "detail": {
+        "matrix": 111581,
+        "features": 111581
+      }
+    },
+    {
+      "stage": "preprocessing",
+      "check": "tree/val: columns = fitted preprocessor output",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "preprocessing",
+      "check": "tree/test: matrix rows = feature-table rows",
+      "status": "PASS",
+      "detail": {
+        "matrix": 555719,
+        "features": 555719
+      }
+    },
+    {
+      "stage": "preprocessing",
+      "check": "tree/test: columns = fitted preprocessor output",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "preprocessing",
+      "check": "tree: excluded features absent",
+      "status": "PASS",
+      "detail": []
+    },
+    {
+      "stage": "preprocessing",
+      "check": "linear view has no missing values",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "models",
+      "check": "hybrid_gb: saved model exists",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "models",
+      "check": "hybrid_gb: input features = preprocessed columns",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "models",
+      "check": "hybrid_gb: imbalance handled by class weights (no resampling)",
+      "status": "PASS",
+      "detail": {
+        "class_weight": "balanced"
+      }
+    },
+    {
+      "stage": "models",
+      "check": "hist_gb: saved model exists",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "models",
+      "check": "hist_gb: input features = preprocessed columns",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "models",
+      "check": "hist_gb: imbalance handled by class weights (no resampling)",
+      "status": "PASS",
+      "detail": {
+        "class_weight": "balanced"
+      }
+    },
+    {
+      "stage": "models",
+      "check": "logistic: saved model exists",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "models",
+      "check": "logistic: input features = preprocessed columns",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "models",
+      "check": "logistic: imbalance handled by class weights (no resampling)",
+      "status": "PASS",
+      "detail": {
+        "class_weight": "balanced"
+      }
+    },
+    {
+      "stage": "models",
+      "check": "isolation_forest: saved model exists",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "models",
+      "check": "isolation_forest: input features = preprocessed columns",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "selection",
+      "check": "selection rule recorded in results",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "selection",
+      "check": "reported champion = champion chosen by the rule",
+      "status": "PASS",
+      "detail": {
+        "reported": "hist_gb",
+        "rule": "hist_gb"
+      }
+    },
+    {
+      "stage": "selection",
+      "check": "champion is the simplest model equivalent to the best",
+      "status": "PASS",
+      "detail": {
+        "equivalent": [
+          "hybrid_gb",
+          "hist_gb"
+        ],
+        "champion": "hist_gb"
+      }
+    },
+    {
+      "stage": "reproduction",
+      "check": "threshold re-derived on validation = reported threshold",
+      "status": "PASS",
+      "detail": {
+        "recomputed": 0.890478,
+        "reported": 0.890478
+      }
+    },
+    {
+      "stage": "reproduction",
+      "check": "re-scored test PR-AUC = reported",
+      "status": "PASS",
+      "detail": {
+        "recomputed": 0.9749,
+        "reported": 0.9749
+      }
+    },
+    {
+      "stage": "reproduction",
+      "check": "re-scored test confusion matrix = reported",
+      "status": "PASS",
+      "detail": {
+        "recomputed": [
+          2031,
+          251,
+          114
+        ],
+        "reported": [
+          2031,
+          251,
+          114
+        ]
+      }
+    },
+    {
+      "stage": "reproduction",
+      "check": "re-scored test net benefit = reported",
+      "status": "PASS",
+      "detail": {
+        "recomputed": 967018.96,
+        "reported": 967018.96
+      }
+    },
+    {
+      "stage": "dashboard",
+      "check": "dashboard data has been generated",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "dashboard",
+      "check": "dashboard uses the selected champion",
+      "status": "PASS",
+      "detail": {
+        "dashboard": "hist_gb",
+        "champion": "hist_gb"
+      }
+    },
+    {
+      "stage": "dashboard",
+      "check": "dashboard threshold = reported threshold",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "dashboard",
+      "check": "dashboard rows = validation + test rows",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "dashboard",
+      "check": "dashboard test alerts = reported alerts",
+      "status": "PASS",
+      "detail": {
+        "dashboard": 2282,
+        "reported": 2282
+      }
+    }
+  ]
+}

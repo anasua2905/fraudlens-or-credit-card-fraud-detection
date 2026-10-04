@@ -1,0 +1,23 @@
+{
+  "champion": "hist_gb",
+  "selection_reason": "hybrid_gb has the highest validation PR-AUC (0.9841), but hist_gb (0.9840) is non-inferior: the 95% bootstrap interval of the gap is [-0.0010, +0.0012], entirely below the 0.01 margin. hist_gb is simpler, so it is selected.",
+  "threshold_strategy": "min_cost",
+  "threshold": 0.890478,
+  "thresholds_from_validation": {
+    "max_f1": 0.890478,
+    "alert_budget": 0.031548,
+    "min_cost": 0.890478
+  },
+  "investigation_cost": 15,
+  "recovery_rate": 0.9,
+  "alerts_per_day_budget": 50,
+  "rows": {
+    "val": 111581,
+    "test": 555719
+  },
+  "alerts": {
+    "val": 701,
+    "test": 2282
+  },
+  "scored_file": "D:\\AUS\\CDU\\MDS\\Semester-3\\PRT661\\A2\\fraud-detection\\data\\gold\\scored_transactions.parquet"
+}

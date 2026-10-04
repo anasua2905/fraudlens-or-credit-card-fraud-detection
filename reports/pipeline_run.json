@@ -1,7 +1,7 @@
 {
   "manifest": {
     "source": "kaggle",
-    "ingested_at_utc": "2026-09-16T13:54:06.519273+00:00",
+    "ingested_at_utc": "2026-10-04T14:10:16.364906+00:00",
     "files": {
       "train": {
         "file": "fraudTrain.csv",
@@ -105,5 +105,5 @@
     "amt_to_card_mean": 0.054,
     "amt_zscore_card": 0.108
   },
-  "runtime_seconds": 106.3
+  "runtime_seconds": 61.0
 }

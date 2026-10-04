@@ -1,6 +1,48 @@
 {
   "protocol": "fit on train; model and thresholds chosen on validation; test scored once",
-  "champion": "hybrid_gb",
+  "champion": "hist_gb",
+  "selection": {
+    "rule": "simplest supervised model that is non-inferior to the best on validation PR-AUC (paired bootstrap; upper 95% bound of the gap below the margin)",
+    "margin": 0.01,
+    "complexity_order": [
+      "logistic",
+      "hist_gb",
+      "mlp",
+      "hybrid_gb"
+    ],
+    "best_by_validation_pr_auc": "hybrid_gb",
+    "champion": "hist_gb",
+    "reason": "hybrid_gb has the highest validation PR-AUC (0.9841), but hist_gb (0.9840) is non-inferior: the 95% bootstrap interval of the gap is [-0.0010, +0.0012], entirely below the 0.01 margin. hist_gb is simpler, so it is selected.",
+    "comparisons": {
+      "hybrid_gb": {
+        "gap_mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "equivalent_to_best": true,
+        "n_boot": 0
+      },
+      "logistic": {
+        "gap_mean": 0.29994,
+        "ci95_low": 0.26965,
+        "ci95_high": 0.33148,
+        "equivalent_to_best": false,
+        "n_boot": 500
+      },
+      "hist_gb": {
+        "gap_mean": 0.0001,
+        "ci95_low": -0.00103,
+        "ci95_high": 0.00124,
+        "equivalent_to_best": true,
+        "n_boot": 500
+      }
+    }
+  },
+  "imbalance_handling": {
+    "logistic": "class_weight='balanced'; no resampling",
+    "hist_gb": "class_weight='balanced'; no resampling",
+    "isolation_forest": "none needed: unsupervised, fitted on legitimate transactions only",
+    "hybrid_gb": "class_weight='balanced'; no resampling"
+  },
   "threshold_strategy": "min_cost",
   "comparison": [
     {
@@ -461,102 +503,97 @@
   "champion_importance": [
     {
       "feature": "amount",
-      "importance": 0.89885,
-      "std": 0.01001
+      "importance": 0.90339,
+      "std": 0.0108
     },
     {
       "feature": "category",
-      "importance": 0.5634,
-      "std": 0.02584
+      "importance": 0.59259,
+      "std": 0.02424
     },
     {
       "feature": "amt_sum_24h",
-      "importance": 0.11884,
-      "std": 0.00063
+      "importance": 0.11581,
+      "std": 0.00046
     },
     {
       "feature": "hour",
-      "importance": 0.0289,
-      "std": 0.00288
+      "importance": 0.03235,
+      "std": 0.00268
     },
     {
       "feature": "age",
-      "importance": 0.02726,
-      "std": 0.0021
+      "importance": 0.02827,
+      "std": 0.00204
     },
     {
       "feature": "is_night",
-      "importance": 0.01856,
-      "std": 0.00192
-    },
-    {
-      "feature": "txn_count_24h",
-      "importance": 0.0111,
-      "std": 0.00272
+      "importance": 0.02082,
+      "std": 0.00223
     },
     {
       "feature": "secs_since_last_txn",
-      "importance": 0.01065,
-      "std": 0.00047
+      "importance": 0.01153,
+      "std": 0.00081
+    },
+    {
+      "feature": "txn_count_24h",
+      "importance": 0.01026,
+      "std": 0.00217
     },
     {
       "feature": "txn_count_7d",
-      "importance": 0.00782,
-      "std": 0.00248
+      "importance": 0.00775,
+      "std": 0.00214
     },
     {
       "feature": "log_city_pop",
-      "importance": 0.0061,
-      "std": 0.00027
+      "importance": 0.00618,
+      "std": 0.00026
     },
     {
       "feature": "amt_sum_7d",
-      "importance": 0.00517,
-      "std": 0.00113
+      "importance": 0.00597,
+      "std": 0.00148
     },
     {
       "feature": "amt_zscore_card",
-      "importance": 0.00207,
-      "std": 0.00072
+      "importance": 0.00283,
+      "std": 0.00042
     },
     {
       "feature": "gender",
-      "importance": 0.00206,
-      "std": 0.00055
+      "importance": 0.00173,
+      "std": 0.00064
     },
     {
       "feature": "amt_sum_1h",
-      "importance": 0.00149,
-      "std": 0.00035
+      "importance": 0.00155,
+      "std": 0.00025
     },
     {
       "feature": "amt_to_card_mean",
-      "importance": 0.00098,
-      "std": 0.00023
-    },
-    {
-      "feature": "anomaly_score",
-      "importance": 0.00085,
-      "std": 0.00098
+      "importance": 0.00086,
+      "std": 0.00027
     },
     {
       "feature": "category_share_card",
-      "importance": 0.00048,
-      "std": 0.00024
-    },
-    {
-      "feature": "day_of_week",
-      "importance": 0.00018,
-      "std": 0.00045
+      "importance": 0.00051,
+      "std": 0.00026
     },
     {
       "feature": "txn_count_1h",
-      "importance": 0.00011,
-      "std": 2e-05
+      "importance": 0.00019,
+      "std": 6e-05
+    },
+    {
+      "feature": "day_of_week",
+      "importance": 0.00017,
+      "std": 0.0005
     },
     {
       "feature": "is_weekend",
-      "importance": 0.0,
+      "importance": 5e-05,
       "std": 0.0
     },
     {
@@ -567,7 +604,7 @@
   ],
   "validation_sweep_head": [
     {
-      "threshold": 0.000931,
+      "threshold": 0.00101,
       "alerts": 11159,
       "true_positives": 669,
       "false_positives": 10490,
@@ -586,7 +623,7 @@
       "net_benefit": 159808.04
     },
     {
-      "threshold": 0.000959,
+      "threshold": 0.001033,
       "alerts": 10970,
       "true_positives": 669,
       "false_positives": 10301,
@@ -605,7 +642,7 @@
       "net_benefit": 162643.04
     },
     {
-      "threshold": 0.000982,
+      "threshold": 0.001059,
       "alerts": 10781,
       "true_positives": 669,
       "false_positives": 10112,
@@ -624,7 +661,7 @@
       "net_benefit": 165478.04
     },
     {
-      "threshold": 0.001007,
+      "threshold": 0.001086,
       "alerts": 10592,
       "true_positives": 669,
       "false_positives": 9923,
@@ -643,7 +680,7 @@
       "net_benefit": 168313.04
     },
     {
-      "threshold": 0.001036,
+      "threshold": 0.001113,
       "alerts": 10403,
       "true_positives": 669,
       "false_positives": 9734,
@@ -662,7 +699,7 @@
       "net_benefit": 171148.04
     },
     {
-      "threshold": 0.001067,
+      "threshold": 0.00114,
       "alerts": 10214,
       "true_positives": 669,
       "false_positives": 9545,
@@ -681,7 +718,7 @@
       "net_benefit": 173983.04
     },
     {
-      "threshold": 0.001093,
+      "threshold": 0.001171,
       "alerts": 10025,
       "true_positives": 669,
       "false_positives": 9356,
@@ -700,7 +737,7 @@
       "net_benefit": 176818.04
     },
     {
-      "threshold": 0.001127,
+      "threshold": 0.001203,
       "alerts": 9836,
       "true_positives": 669,
       "false_positives": 9167,
@@ -719,7 +756,7 @@
       "net_benefit": 179653.04
     },
     {
-      "threshold": 0.001159,
+      "threshold": 0.001237,
       "alerts": 9647,
       "true_positives": 669,
       "false_positives": 8978,
@@ -738,7 +775,7 @@
       "net_benefit": 182488.04
     },
     {
-      "threshold": 0.001196,
+      "threshold": 0.00127,
       "alerts": 9458,
       "true_positives": 669,
       "false_positives": 8789,
@@ -757,7 +794,7 @@
       "net_benefit": 185323.04
     },
     {
-      "threshold": 0.001236,
+      "threshold": 0.001308,
       "alerts": 9269,
       "true_positives": 669,
       "false_positives": 8600,
@@ -776,7 +813,7 @@
       "net_benefit": 188158.04
     },
     {
-      "threshold": 0.001276,
+      "threshold": 0.001346,
       "alerts": 9080,
       "true_positives": 669,
       "false_positives": 8411,
@@ -795,7 +832,7 @@
       "net_benefit": 190993.04
     },
     {
-      "threshold": 0.001325,
+      "threshold": 0.001388,
       "alerts": 8891,
       "true_positives": 669,
       "false_positives": 8222,
@@ -814,7 +851,7 @@
       "net_benefit": 193828.04
     },
     {
-      "threshold": 0.001374,
+      "threshold": 0.001435,
       "alerts": 8702,
       "true_positives": 669,
       "false_positives": 8033,
@@ -833,7 +870,7 @@
       "net_benefit": 196663.04
     },
     {
-      "threshold": 0.001426,
+      "threshold": 0.001481,
       "alerts": 8513,
       "true_positives": 669,
       "false_positives": 7844,
@@ -852,5 +889,5 @@
       "net_benefit": 199498.04
     }
   ],
-  "runtime_seconds": 256.5
+  "runtime_seconds": 286.0
 }

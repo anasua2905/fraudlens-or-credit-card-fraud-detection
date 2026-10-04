@@ -89,8 +89,8 @@ print(f"Champion: {report['champion']}   |   runtime: {report['runtime_seconds']
 md("""
 ## 2. Model comparison
 
-Ranked by **validation** PR-AUC, which is the number that decided the champion. The test columns are
-reported at the threshold chosen on validation.
+Ranked by **validation** PR-AUC. The champion is chosen from this ranking by the rule in section 2b.
+The test columns are reported at the threshold chosen on validation.
 """)
 
 code("""
@@ -100,6 +100,23 @@ display(comparison)
 
 code("""
 display(Image(filename=str(FIGURES / "10_pr_curves_test.png")))
+""")
+
+md("""
+## 2b. Champion selection rule
+
+The champion is not simply the model with the highest validation PR-AUC. It is the **simplest model that is
+non-inferior to the best**: a paired bootstrap on the validation split estimates each model's PR-AUC gap to
+the best, and a model qualifies only if the upper 95% bound of that gap is below the margin
+(`model.selection_margin`, default 0.01). Extra complexity has to buy measurable performance.
+""")
+
+code("""
+sel = report["selection"]
+print(sel["reason"])
+display(pd.DataFrame(sel["comparisons"]).T)
+print("\\nClass imbalance handling (read from the fitted models):")
+display(pd.Series(report["imbalance_handling"], name="method").to_frame())
 """)
 
 md("""

@@ -15,7 +15,21 @@ FraudLens: data pipeline, cleaning, preprocessing and EDA for the
 | Gold | `data/gold/dashboard_transactions` | Descriptive table for the monitoring dashboard |
 | Run log | `reports/pipeline_run.json` | Row counts, split ranges, fraud rates, null rates, runtime |
 
-## Quick start
+## Run everything (recommended)
+
+```bash
+python -m fraud_pipeline.run_all              # ingest -> quality -> eda -> preprocess -> train -> score -> verify
+streamlit run dashboard/app.py                # open the monitoring dashboard
+```
+
+`run_all` ends with an **end-to-end verification** (`reports/verification_report.json`, 48 checks) that
+compares every stage with every other: manifest checksums and row counts, preprocessor outputs against the
+saved matrices, each saved model's inputs against those matrices, the class-imbalance method read from the
+fitted models, the champion against the documented selection rule, a fresh re-scoring of the test split
+against the reported metrics, and the dashboard data against the reported results. It exits with code 1 if
+any check fails. Resume from a later stage with `--from train` (or any stage name).
+
+## Quick start (individual stages)
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -88,7 +102,14 @@ or open `notebooks/02_modelling.ipynb`, which adds error analysis.
 | `mlp` | Neural network (optional; add to `model.models`) | Deep-learning comparison |
 
 Protocol: models are fitted on train, compared on validation, and the test split is scored **once** with
-thresholds already fixed. Imbalance is handled with class weights inside training, never by resampling
+thresholds already fixed.
+
+**Champion selection** (`selection.py`) is a written rule, not "highest score wins": the champion is the
+simplest supervised model that is **non-inferior** to the best on validation PR-AUC. A paired bootstrap
+estimates each model's gap to the best, and a model qualifies only if the upper 95% bound of the gap is below
+`model.selection_margin` (0.01). Complexity order: logistic < hist_gb < mlp < hybrid_gb (the hybrid needs an
+Isolation Forest scored before every prediction). The rule, the bootstrap intervals and the reason are written
+to `model_results.json` and checked by the verifier. Imbalance is handled with class weights inside training, never by resampling
 validation or test.
 
 Thresholds are chosen on validation by one of three strategies (`model.threshold.primary`):
@@ -99,6 +120,28 @@ Thresholds are chosen on validation by one of three strategies (`model.threshold
 
 Reported metrics: PR-AUC against its random baseline, precision, recall, alerts per day, false alarms per
 catch, and net benefit. Accuracy is not reported, because predicting "legitimate" everywhere scores 99.4%.
+
+## Monitoring dashboard
+
+```bash
+python -m fraud_pipeline.score        # (run_all does this) -> data/gold/scored_transactions, reports/dashboard_meta.json
+streamlit run dashboard/app.py
+```
+
+| Tab | What it shows |
+|---|---|
+| Overview | KPIs (alerts, cards to review, precision, recall, false alarms per catch, net benefit) and a daily chart |
+| Alert queue | Alerts grouped by card (fraud arrives in ~45-hour bursts), with a per-card timeline and plain-language reasons for each alert; CSV export |
+| Threshold & cost | Precision/recall and net benefit against alert volume, operating-point comparison, break-even review cost |
+| Patterns | Outcomes by category, hour and amount; map of alerted cardholders |
+| Lookup | Any transaction or card: score, decision, reasons, card history |
+| Model & data health | Champion and selection rule, model comparison, imbalance method, feature drift, verification status |
+| Report | Monitoring summary for the current filters, downloadable as Markdown and CSV |
+
+The sidebar sets the period, date range, category and state filters, the operating point (the thresholds
+chosen on validation, or a custom one) and the cost assumptions. All numbers come from
+`fraud_pipeline/dashboard_data.py`, which is tested to reconcile exactly with `model_results.json`.
+The dashboard is a historical replay: the true outcome of every alert is known.
 
 ## Design decisions
 
@@ -159,6 +202,12 @@ src/fraud_pipeline/
   models.py                     model definitions
   evaluate.py                   metrics, threshold selection, cost model
   train.py                      training, evaluation, error analysis
+  selection.py                  champion selection rule (non-inferiority bootstrap)
+  score.py                      scores validation/test with the champion for the dashboard
+  verify.py                     end-to-end verification (48 checks)
+  run_all.py                    runs every stage, then verifies
+  dashboard_data.py             all dashboard calculations (tested)
+dashboard/app.py                Streamlit monitoring dashboard
 notebooks/01_cleaning_eda_preprocessing.ipynb
 notebooks/02_modelling.ipynb
 scripts/make_sample_data.py     schema-identical synthetic sample for tests
@@ -166,21 +215,15 @@ scripts/build_notebook.py       regenerates the notebook
 tests/test_pipeline.py          Step 1: end-to-end + leakage tests
 tests/test_step3.py             Step 3: audit, EDA and preprocessing tests
 tests/test_models.py            Step 4: training, metrics and threshold tests
+tests/test_e2e.py               full run, selection rule, tamper detection, dashboard reconciliation
 artifacts/                      fitted preprocessors (.joblib)
 ```
 
 ## Roadmap
 
-- [x] Update System Architecture
-- [x] Data Acquisition and Storage
-- [x] Data Pipeline Design and Data Engineering
-- [x] Data cleaning, Data Preprocessing and EDA
+- [x] Step 1: Data pipeline and data engineering
+- [x] Step 3: Data cleaning, preprocessing and EDA
 - [x] Modelling (baselines, gradient boosting, anomaly detectors, threshold tuning)
-- [x] Implementation Progress
-- [x] Project Governance
-- [x] Risk Analysis
-- [x] Ethics, Privacy and Security Considerations
-- [x] Updated workflow
-- [ ] Monitoring dashboard and Visualisation
-- [ ] Valuation of progress
+- [x] End-to-end verification and documented champion selection
+- [x] Monitoring dashboard
 - [ ] Reporting and decision support
