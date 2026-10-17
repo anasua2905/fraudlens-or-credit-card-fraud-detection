@@ -1,0 +1,219 @@
+{
+  "built_at": "2026-10-18T09:49:08",
+  "champion": "hist_gb",
+  "rows_scored": 667300,
+  "total_mb": 40.3,
+  "requirements": [
+    "streamlit>=1.66",
+    "pandas>=3.0",
+    "numpy==2.4.6",
+    "scikit-learn==1.9.1",
+    "joblib==1.6.0",
+    "pyarrow>=25.0",
+    "plotly>=5.24",
+    "pyyaml>=6.0",
+    "shap>=0.51"
+  ],
+  "files": [
+    {
+      "file": "card_state_cards.parquet",
+      "bytes": 546053,
+      "sha256": "c30c237b727b90df24a1ff5969674aee9b804b8e48886086bba020672be731a9"
+    },
+    {
+      "file": "card_state_categories.parquet",
+      "bytes": 36905,
+      "sha256": "471333534997c6de3df08d7382d4c1b71d5652101110b2c2b26ddef8fd4d32dd"
+    },
+    {
+      "file": "card_state_window.parquet",
+      "bytes": 274627,
+      "sha256": "da4dc574f0710e84322d5d00d4277ea4137e959a6292c9beae7a31ce48956c45"
+    },
+    {
+      "file": "figures/01_class_balance.png",
+      "bytes": 18303,
+      "sha256": "8c9a3bf8d0f286aadc8c1d74079fddc99a6606cc21d747f8552a423850182fc9"
+    },
+    {
+      "file": "figures/02_amount_by_class.png",
+      "bytes": 22595,
+      "sha256": "9f0f26ac97fa4c0a955ff9b6cb371480db594835ba66598dc97334962b6c7a98"
+    },
+    {
+      "file": "figures/03_fraud_by_category.png",
+      "bytes": 38057,
+      "sha256": "25c1d2b0630aed79b68c1fb2d65b540b17ffeb11daf913749dcd4e06ca27e7e0"
+    },
+    {
+      "file": "figures/04_fraud_by_time.png",
+      "bytes": 80408,
+      "sha256": "23204ddfb3b8131dcd495b19fa9a4960f44585042228402d45d1aa7975bec6c6"
+    },
+    {
+      "file": "figures/05_fraud_by_demographics.png",
+      "bytes": 40403,
+      "sha256": "2bc3e54642f662eac434ba2f4737154945147aed9bd9c0620eebe7ae5f2a9f5b"
+    },
+    {
+      "file": "figures/06_fraud_by_behaviour.png",
+      "bytes": 52781,
+      "sha256": "7cfbd1781eb3645bb0b148853494ee3660e173ad1694ad033d606a51f2e2eb60"
+    },
+    {
+      "file": "figures/07_feature_signal.png",
+      "bytes": 56222,
+      "sha256": "7e3889f2dd4503b00a749f539dd581ccce18efe56f76d6fcaa34f9a6b2b4cb35"
+    },
+    {
+      "file": "figures/08_correlation.png",
+      "bytes": 90363,
+      "sha256": "4818222647e9b965cb85761ccf91ce3914ae3ed2e1feabd93ccebcc6828eaf4c"
+    },
+    {
+      "file": "figures/09_amount_by_category.png",
+      "bytes": 74303,
+      "sha256": "81572a4a87be7d4d19da4d58664e1390d1ca8b5574fb6c5f8598c6d7d308de9d"
+    },
+    {
+      "file": "figures/10_pr_curves_test.png",
+      "bytes": 64777,
+      "sha256": "eaa3b7e6d70c85b3508cf033d30c0afd443817479f20114be6830c226a49cade"
+    },
+    {
+      "file": "figures/11_threshold_sweep_validation.png",
+      "bytes": 66312,
+      "sha256": "8151b5fd2cab80afd3d6271b3d8d14333be9d44b79c853ea535eba4ed7770972"
+    },
+    {
+      "file": "figures/12_score_distribution_test.png",
+      "bytes": 25641,
+      "sha256": "09083d62256a74d27c4ed6b8607518e01396ad78fbb1d7bf89fa4ae027dfbd5b"
+    },
+    {
+      "file": "figures/13_permutation_importance.png",
+      "bytes": 43248,
+      "sha256": "38ac9284a8fb6cc9f190973293efe01af9a5e9044088721d9906625b06f62c90"
+    },
+    {
+      "file": "figures/14_calibration_test.png",
+      "bytes": 30016,
+      "sha256": "3aa55ba8ec484be40e6e84d28c2ad684dbc92ae5522ff0efa74c7e4136fa4ae2"
+    },
+    {
+      "file": "figures/15_monthly_performance_test.png",
+      "bytes": 25790,
+      "sha256": "5ae520789ae5955605a29b35408be16b807ca4d8aac79ad5bd8da97b062d6f1d"
+    },
+    {
+      "file": "figures/16_shap_importance.png",
+      "bytes": 41898,
+      "sha256": "90dfd3ac0eba39cc86bba65ce80879326ad1def9591c5266bd2b63de33e342c9"
+    },
+    {
+      "file": "figures/17_shap_beeswarm.png",
+      "bytes": 126724,
+      "sha256": "1a1c1e591363e795df07a1819b9c3fa6888d92a14759c4385b58e73cad20dad7"
+    },
+    {
+      "file": "figures/18_shap_waterfall_caught_fraud.png",
+      "bytes": 64235,
+      "sha256": "24ceddaa5248fc9de400b739a6146bd717831033925c0de2e5c31cd8a37df04a"
+    },
+    {
+      "file": "figures/18_shap_waterfall_false_alert.png",
+      "bytes": 64823,
+      "sha256": "9806b678dae25d882c08efa6ec7fe2bdda23d02c051ae706d5ada1575c5d143a"
+    },
+    {
+      "file": "figures/19_monitoring_monthly.png",
+      "bytes": 56617,
+      "sha256": "1e683a4012ebc3349d10ff5cbe68e82902c3a64782ff1b738c8a4cb17bc7dae9"
+    },
+    {
+      "file": "model.joblib",
+      "bytes": 145616,
+      "sha256": "3208ee253b61216da06cd471caf72a4d8ebe98cf274bac0e16f3f37a6d386c24"
+    },
+    {
+      "file": "reports/acquisition_manifest.json",
+      "bytes": 663,
+      "sha256": "ff8eadaf453ae6e322c6cee549043fd1ed21a189ed09b8a97395ef00da35b39a"
+    },
+    {
+      "file": "reports/acquisition_metadata.json",
+      "bytes": 4376,
+      "sha256": "ce8a34c0ad02611622011985d3b3467c67e5451eadb73e9598bf75fa9d75c23c"
+    },
+    {
+      "file": "reports/cleaning_audit.json",
+      "bytes": 4935,
+      "sha256": "546517e893f461be6a85e31f85ac83beeae82f4e50317cd1e8c89116c96d90db"
+    },
+    {
+      "file": "reports/dashboard_meta.json",
+      "bytes": 1502,
+      "sha256": "f1a1427c63b7081dba1a8bfdf17953ad34f782ccdbf7dd9f38eb32d9b41b1173"
+    },
+    {
+      "file": "reports/eda_summary.json",
+      "bytes": 34381,
+      "sha256": "88ff57855e91c7fa88dc0bd85b1f31e35884f0296dd4509af62e2d7325bae33f"
+    },
+    {
+      "file": "reports/explanations.json",
+      "bytes": 1956,
+      "sha256": "8de6b2c187f984dcde8c88db97a4c44586fdcc6b765817afc99e89bd8b9f4449"
+    },
+    {
+      "file": "reports/model_results.json",
+      "bytes": 80343,
+      "sha256": "6c88913ff2c64645420d43699c201d2b8b68b193f0f2f85bac5a1d7d8024f4a6"
+    },
+    {
+      "file": "reports/monitoring/feature_drift.csv",
+      "bytes": 5176,
+      "sha256": "0b64c9377c35aff93b3267cafa5e54322b8bdf9986d20117fc59112c99646c4f"
+    },
+    {
+      "file": "reports/monitoring/monthly.csv",
+      "bytes": 1329,
+      "sha256": "8c53fb6552a92a7bde0291bac3d91df8bcd4441b3abc18dc2ecebf1f6e3c659b"
+    },
+    {
+      "file": "reports/monitoring/summary.json",
+      "bytes": 5255,
+      "sha256": "0e4940a13249e8a6fc58eca51cd16d39095619ad1e124847fe3266bf50cd65cb"
+    },
+    {
+      "file": "reports/pipeline_run.json",
+      "bytes": 2948,
+      "sha256": "393ab5e4b29aa19b3bb3e114e466da2cba0aa6448e5394fb0304f2a9c5151696"
+    },
+    {
+      "file": "reports/preprocessing_report.json",
+      "bytes": 4238,
+      "sha256": "92975c8bd216abc53c66960d6f9d7981e3bdb7b6500576088725da7a2910a454"
+    },
+    {
+      "file": "reports/validation_report.json",
+      "bytes": 4657,
+      "sha256": "b40e2367bc3bf75a894d9af963f7cc70633b72a00889c270d0de9064727bff2e"
+    },
+    {
+      "file": "reports/verification_report.json",
+      "bytes": 10621,
+      "sha256": "7512b776b152dfc8dbb07d81d2d6936b847359e47066751753081b9ce0f9adbc"
+    },
+    {
+      "file": "scored.parquet",
+      "bytes": 38041232,
+      "sha256": "0b98c9c529f32e71f5fc245c48d53c2943674c32ae363461d30d9786a4901069"
+    },
+    {
+      "file": "shap_background.parquet",
+      "bytes": 28230,
+      "sha256": "4223579d5224630e700b3cb29c72c4e91cba1ada106b8b506cb40ee517b86ff9"
+    }
+  ]
+}

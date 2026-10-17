@@ -1,0 +1,22 @@
+{
+  "dataset": "kartik2112/fraud-detection",
+  "source_url": "https://www.kaggle.com/datasets/kartik2112/fraud-detection",
+  "licence": "CC0-1.0",
+  "acquired_via": "local",
+  "acquired_at_utc": "2026-10-17T15:22:31.426286+00:00",
+  "files": {
+    "train": {
+      "file": "fraudTrain.csv",
+      "bytes": 351238196,
+      "rows": 1296675,
+      "sha256": "fd7139200dbfcbed0b6742bbe05a4f1abce532c4fef20918228a651647a3e75d"
+    },
+    "test": {
+      "file": "fraudTest.csv",
+      "bytes": 150354339,
+      "rows": 555719,
+      "sha256": "12d553ab19440c752d2531ee1af44bb64f12cc3d3839f1649f19e81c230545f0"
+    }
+  },
+  "raw_dir": "data/raw"
+}

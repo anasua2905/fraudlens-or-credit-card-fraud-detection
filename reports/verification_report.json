@@ -1,38 +1,92 @@
 {
   "status": "PASS",
-  "passed": 48,
+  "passed": 56,
   "failed": 0,
   "champion": "hist_gb",
+  "success_criteria_met": true,
+  "success_criteria": [
+    {
+      "criterion": "min_test_recall",
+      "value": 0.9622,
+      "target": 0.9,
+      "met": true
+    },
+    {
+      "criterion": "min_test_precision",
+      "value": 0.724,
+      "target": 0.5,
+      "met": true
+    },
+    {
+      "criterion": "max_alerts_per_day",
+      "value": 14.7,
+      "target": 20,
+      "met": true
+    },
+    {
+      "criterion": "min_pr_auc_lift",
+      "value": 251.3,
+      "target": 50,
+      "met": true
+    }
+  ],
   "checks": [
     {
-      "stage": "ingestion",
+      "stage": "1-problem",
+      "check": "success criteria defined in config",
+      "status": "PASS",
+      "detail": {
+        "min_test_recall": 0.9,
+        "min_test_precision": 0.5,
+        "max_alerts_per_day": 20,
+        "min_pr_auc_lift": 50
+      }
+    },
+    {
+      "stage": "2-acquisition",
       "check": "fraudTrain.csv checksum matches manifest",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "ingestion",
+      "stage": "2-acquisition",
       "check": "fraudTest.csv checksum matches manifest",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "cleaning",
-      "check": "silver rows = manifest rows (nothing lost)",
-      "status": "PASS",
-      "detail": {
-        "manifest": 1852394,
-        "silver": 1852394
-      }
-    },
-    {
-      "stage": "cleaning",
-      "check": "no identifying columns in silver",
+      "stage": "2-acquisition",
+      "check": "dataset licence and source recorded",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "splitting",
+      "stage": "3-preparation",
+      "check": "raw files passed the data contract",
+      "status": "PASS",
+      "detail": [
+        "WARN",
+        "WARN"
+      ]
+    },
+    {
+      "stage": "3-preparation",
+      "check": "silver rows = manifest rows - removed rows",
+      "status": "PASS",
+      "detail": {
+        "manifest": 1852394,
+        "removed": 0,
+        "silver": 1852394
+      }
+    },
+    {
+      "stage": "3-preparation",
+      "check": "no direct identifiers in silver",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "3-preparation",
       "check": "split rows sum to silver rows",
       "status": "PASS",
       "detail": {
@@ -42,321 +96,341 @@
       }
     },
     {
-      "stage": "splitting",
+      "stage": "3-preparation",
       "check": "no transaction appears in two splits",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "splitting",
+      "stage": "3-preparation",
       "check": "splits are chronological (train < val < test)",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "features",
+      "stage": "3-preparation",
       "check": "no feature is derived from the label",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "preprocessing",
-      "check": "linear/train: matrix rows = feature-table rows",
+      "stage": "3-preparation",
+      "check": "online store holds every card and every transaction",
       "status": "PASS",
       "detail": {
-        "matrix": 1185094,
-        "features": 1185094
+        "cards": 999,
+        "transactions": 1852394
       }
     },
     {
-      "stage": "preprocessing",
-      "check": "linear/train: columns = fitted preprocessor output",
+      "stage": "4-eda",
+      "check": "eda_summary.json written",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "preprocessing",
-      "check": "linear: same row order as feature table",
+      "stage": "4-eda",
+      "check": "cleaning_audit.json written",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "preprocessing",
-      "check": "linear/val: matrix rows = feature-table rows",
+      "stage": "4-eda",
+      "check": "EDA figures written",
       "status": "PASS",
-      "detail": {
-        "matrix": 111581,
-        "features": 111581
-      }
+      "detail": 9
     },
     {
-      "stage": "preprocessing",
-      "check": "linear/val: columns = fitted preprocessor output",
+      "stage": "4-eda",
+      "check": "interactive EDA explorer written",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "preprocessing",
-      "check": "linear/test: matrix rows = feature-table rows",
-      "status": "PASS",
-      "detail": {
-        "matrix": 555719,
-        "features": 555719
-      }
-    },
-    {
-      "stage": "preprocessing",
-      "check": "linear/test: columns = fitted preprocessor output",
+      "stage": "5-modelling",
+      "check": "linear: train matrix rows = feature rows",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "preprocessing",
+      "stage": "5-modelling",
       "check": "linear: excluded features absent",
       "status": "PASS",
       "detail": []
     },
     {
-      "stage": "preprocessing",
-      "check": "tree/train: matrix rows = feature-table rows",
-      "status": "PASS",
-      "detail": {
-        "matrix": 1185094,
-        "features": 1185094
-      }
-    },
-    {
-      "stage": "preprocessing",
-      "check": "tree/train: columns = fitted preprocessor output",
+      "stage": "5-modelling",
+      "check": "tree: train matrix rows = feature rows",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "preprocessing",
-      "check": "tree: same row order as feature table",
-      "status": "PASS",
-      "detail": null
-    },
-    {
-      "stage": "preprocessing",
-      "check": "tree/val: matrix rows = feature-table rows",
-      "status": "PASS",
-      "detail": {
-        "matrix": 111581,
-        "features": 111581
-      }
-    },
-    {
-      "stage": "preprocessing",
-      "check": "tree/val: columns = fitted preprocessor output",
-      "status": "PASS",
-      "detail": null
-    },
-    {
-      "stage": "preprocessing",
-      "check": "tree/test: matrix rows = feature-table rows",
-      "status": "PASS",
-      "detail": {
-        "matrix": 555719,
-        "features": 555719
-      }
-    },
-    {
-      "stage": "preprocessing",
-      "check": "tree/test: columns = fitted preprocessor output",
-      "status": "PASS",
-      "detail": null
-    },
-    {
-      "stage": "preprocessing",
+      "stage": "5-modelling",
       "check": "tree: excluded features absent",
       "status": "PASS",
       "detail": []
     },
     {
-      "stage": "preprocessing",
-      "check": "linear view has no missing values",
+      "stage": "5-modelling",
+      "check": "lightgbm: saved model exists",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "models",
+      "stage": "5-modelling",
+      "check": "lightgbm: input features = preprocessed columns",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "5-modelling",
+      "check": "lightgbm: imbalance handled by weighting (no resampling)",
+      "status": "PASS",
+      "detail": "class_weight='balanced'; no resampling"
+    },
+    {
+      "stage": "5-modelling",
+      "check": "xgboost: saved model exists",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "5-modelling",
+      "check": "xgboost: input features = preprocessed columns",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "5-modelling",
+      "check": "xgboost: imbalance handled by weighting (no resampling)",
+      "status": "PASS",
+      "detail": "scale_pos_weight=172.3 (class weighting); no resampling"
+    },
+    {
+      "stage": "5-modelling",
       "check": "hybrid_gb: saved model exists",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "models",
+      "stage": "5-modelling",
       "check": "hybrid_gb: input features = preprocessed columns",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "models",
-      "check": "hybrid_gb: imbalance handled by class weights (no resampling)",
+      "stage": "5-modelling",
+      "check": "hybrid_gb: imbalance handled by weighting (no resampling)",
       "status": "PASS",
-      "detail": {
-        "class_weight": "balanced"
-      }
+      "detail": "class_weight='balanced'; no resampling"
     },
     {
-      "stage": "models",
+      "stage": "5-modelling",
       "check": "hist_gb: saved model exists",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "models",
+      "stage": "5-modelling",
       "check": "hist_gb: input features = preprocessed columns",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "models",
-      "check": "hist_gb: imbalance handled by class weights (no resampling)",
+      "stage": "5-modelling",
+      "check": "hist_gb: imbalance handled by weighting (no resampling)",
       "status": "PASS",
-      "detail": {
-        "class_weight": "balanced"
-      }
+      "detail": "class_weight='balanced'; no resampling"
     },
     {
-      "stage": "models",
+      "stage": "5-modelling",
       "check": "logistic: saved model exists",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "models",
+      "stage": "5-modelling",
       "check": "logistic: input features = preprocessed columns",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "models",
-      "check": "logistic: imbalance handled by class weights (no resampling)",
+      "stage": "5-modelling",
+      "check": "logistic: imbalance handled by weighting (no resampling)",
       "status": "PASS",
-      "detail": {
-        "class_weight": "balanced"
-      }
+      "detail": "class_weight='balanced'; no resampling"
     },
     {
-      "stage": "models",
+      "stage": "5-modelling",
       "check": "isolation_forest: saved model exists",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "models",
-      "check": "isolation_forest: input features = preprocessed columns",
+      "stage": "5-modelling",
+      "check": "hyper-parameters tuned with time-series CV",
       "status": "PASS",
-      "detail": null
+      "detail": [
+        "hist_gb",
+        "lightgbm",
+        "xgboost"
+      ]
     },
     {
-      "stage": "selection",
-      "check": "selection rule recorded in results",
-      "status": "PASS",
-      "detail": null
-    },
-    {
-      "stage": "selection",
+      "stage": "5-modelling",
       "check": "reported champion = champion chosen by the rule",
       "status": "PASS",
-      "detail": {
-        "reported": "hist_gb",
-        "rule": "hist_gb"
-      }
+      "detail": null
     },
     {
-      "stage": "selection",
+      "stage": "5-modelling",
       "check": "champion is the simplest model equivalent to the best",
       "status": "PASS",
       "detail": {
         "equivalent": [
-          "hybrid_gb",
-          "hist_gb"
+          "lightgbm",
+          "hist_gb",
+          "xgboost",
+          "hybrid_gb"
         ],
         "champion": "hist_gb"
       }
     },
     {
-      "stage": "reproduction",
-      "check": "threshold re-derived on validation = reported threshold",
+      "stage": "6-evaluation",
+      "check": "packaged model = reported champion",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "6-evaluation",
+      "check": "packaged threshold = threshold chosen on validation",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "6-evaluation",
+      "check": "threshold re-derived on validation = reported",
       "status": "PASS",
       "detail": {
-        "recomputed": 0.890478,
-        "reported": 0.890478
+        "recomputed": 0.739727,
+        "reported": 0.739727
       }
     },
     {
-      "stage": "reproduction",
+      "stage": "6-evaluation",
       "check": "re-scored test PR-AUC = reported",
       "status": "PASS",
       "detail": {
-        "recomputed": 0.9749,
-        "reported": 0.9749
+        "recomputed": 0.9698,
+        "reported": 0.9698
       }
     },
     {
-      "stage": "reproduction",
+      "stage": "6-evaluation",
       "check": "re-scored test confusion matrix = reported",
       "status": "PASS",
       "detail": {
         "recomputed": [
-          2031,
-          251,
-          114
+          2064,
+          787,
+          81
         ],
         "reported": [
-          2031,
-          251,
-          114
+          2064,
+          787,
+          81
         ]
       }
     },
     {
-      "stage": "reproduction",
-      "check": "re-scored test net benefit = reported",
-      "status": "PASS",
-      "detail": {
-        "recomputed": 967018.96,
-        "reported": 967018.96
-      }
-    },
-    {
-      "stage": "dashboard",
-      "check": "dashboard data has been generated",
+      "stage": "6-evaluation",
+      "check": "re-scored net benefit = reported",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "dashboard",
-      "check": "dashboard uses the selected champion",
+      "stage": "6-evaluation",
+      "check": "test PR-AUC inside its bootstrap 95% CI",
       "status": "PASS",
       "detail": {
-        "dashboard": "hist_gb",
-        "champion": "hist_gb"
+        "low": 0.9632,
+        "high": 0.9751
       }
     },
     {
-      "stage": "dashboard",
-      "check": "dashboard threshold = reported threshold",
+      "stage": "6-evaluation",
+      "check": "SHAP explanations written",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "dashboard",
-      "check": "dashboard rows = validation + test rows",
+      "stage": "6-evaluation",
+      "check": "every test alert has SHAP reasons",
+      "status": "PASS",
+      "detail": {
+        "explained": 2851,
+        "alerts": 2851
+      }
+    },
+    {
+      "stage": "7-deployment",
+      "check": "batch scores generated",
       "status": "PASS",
       "detail": null
     },
     {
-      "stage": "dashboard",
-      "check": "dashboard test alerts = reported alerts",
+      "stage": "7-deployment",
+      "check": "scores use the selected champion and threshold",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "7-deployment",
+      "check": "scored rows = validation + test rows",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "7-deployment",
+      "check": "scored test alerts = reported alerts",
       "status": "PASS",
       "detail": {
-        "dashboard": 2282,
-        "reported": 2282
+        "scored": 2851,
+        "reported": 2851
       }
+    },
+    {
+      "stage": "7-deployment",
+      "check": "online feature store reproduces batch features (streamed replay)",
+      "status": "PASS",
+      "detail": {
+        "transactions": 2000,
+        "comparisons": 22000,
+        "match_rate": 1.0,
+        "mismatches_by_feature": {}
+      }
+    },
+    {
+      "stage": "8-monitoring",
+      "check": "monitoring summary written",
+      "status": "PASS",
+      "detail": null
+    },
+    {
+      "stage": "8-monitoring",
+      "check": "every scored month monitored",
+      "status": "PASS",
+      "detail": {
+        "monitored": 8,
+        "scored_months": 8
+      }
+    },
+    {
+      "stage": "8-monitoring",
+      "check": "retraining decision recorded",
+      "status": "PASS",
+      "detail": null
     }
   ]
 }

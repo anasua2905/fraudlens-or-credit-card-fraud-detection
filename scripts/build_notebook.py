@@ -31,7 +31,7 @@ This notebook covers three stages of the project:
 modelling decisions and make results look better than they really are. The one exception is the drift check
 in B.10, which compares feature distributions (never labels) across periods.
 
-**Prerequisite:** run the Step 1 pipeline first (`python -m fraud_pipeline.pipeline`).
+**Prerequisite:** run the Step 1 pipeline first (`python -m fraudlens.pipeline`).
 """)
 
 code("""
@@ -49,10 +49,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from IPython.display import display
 
-from fraud_pipeline import eda, preprocess, quality
-from fraud_pipeline import features as F
-from fraud_pipeline.datasets import load_analysis_frame
-from fraud_pipeline.utils import load_config
+from fraudlens import eda, preprocess, quality
+from fraudlens import features as F
+from fraudlens.datasets import load_analysis_frame
+from fraudlens.utils import load_config
 
 %matplotlib inline
 pd.set_option("display.max_columns", 50)
@@ -361,7 +361,7 @@ display(vd)
 """)
 
 code("""
-from fraud_pipeline.utils import read_table
+from fraudlens.utils import read_table
 X_train = read_table(cfg["paths"]["processed"] / "linear_train")
 X_train.describe().T.head(15)
 """)

@@ -60,8 +60,8 @@ import json
 import pandas as pd
 from IPython.display import Image, display
 
-from fraud_pipeline import train as T
-from fraud_pipeline.utils import load_config
+from fraudlens import train as T
+from fraudlens.utils import load_config
 
 pd.set_option("display.max_columns", 60)
 pd.set_option("display.float_format", "{:,.4f}".format)
