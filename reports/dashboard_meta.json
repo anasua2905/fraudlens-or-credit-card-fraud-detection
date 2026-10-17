@@ -1,12 +1,12 @@
 {
   "champion": "hist_gb",
-  "selection_reason": "hybrid_gb has the highest validation PR-AUC (0.9841), but hist_gb (0.9840) is non-inferior: the 95% bootstrap interval of the gap is [-0.0010, +0.0012], entirely below the 0.01 margin. hist_gb is simpler, so it is selected.",
+  "selection_reason": "lightgbm has the highest validation PR-AUC (0.9878), but hist_gb (0.9820) is non-inferior: the 95% bootstrap interval of the gap is [+0.0032, +0.0084], entirely below the 0.01 margin. hist_gb is simpler, so it is selected.",
   "threshold_strategy": "min_cost",
-  "threshold": 0.890478,
+  "threshold": 0.739727,
   "thresholds_from_validation": {
-    "max_f1": 0.890478,
-    "alert_budget": 0.031548,
-    "min_cost": 0.890478
+    "max_f1": 0.92749,
+    "alert_budget": 0.097035,
+    "min_cost": 0.739727
   },
   "investigation_cost": 15,
   "recovery_rate": 0.9,
@@ -16,8 +16,46 @@
     "test": 555719
   },
   "alerts": {
-    "val": 701,
-    "test": 2282
+    "val": 841,
+    "test": 2851
   },
-  "scored_file": "D:\\AUS\\CDU\\MDS\\Semester-3\\PRT661\\A2\\fraud-detection\\data\\gold\\scored_transactions.parquet"
+  "scored_file": "data/gold/scored_transactions.parquet",
+  "velocity_windows": {
+    "1h": 3600,
+    "24h": 86400,
+    "7d": 604800
+  },
+  "night_hours": [
+    22,
+    23,
+    0,
+    1,
+    2,
+    3
+  ],
+  "category_risk": {
+    "shopping_net": 1.753,
+    "misc_net": 1.423,
+    "grocery_pos": 1.414,
+    "shopping_pos": 0.721,
+    "gas_transport": 0.467,
+    "misc_pos": 0.308,
+    "grocery_net": 0.301,
+    "travel": 0.291,
+    "entertainment": 0.25,
+    "personal_care": 0.239,
+    "kids_pets": 0.212,
+    "food_dining": 0.167,
+    "home": 0.16,
+    "health_fitness": 0.148
+  },
+  "test_metrics": {
+    "pr_auc": 0.9698,
+    "roc_auc": 0.9995,
+    "precision": 0.724,
+    "recall": 0.9622,
+    "alerts_per_day": 14.7,
+    "net_benefit": 964181.86
+  },
+  "base_rate_test": 0.0038598644278853163
 }

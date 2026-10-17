@@ -1,0 +1,23 @@
+groups:
+  - name: fraudlens
+    rules:
+      - alert: FraudLensApiDown
+        expr: up{job="fraudlens-api"} == 0
+        for: 1m
+        labels: {severity: critical}
+        annotations: {summary: "The FraudLens scoring API is not responding"}
+      - alert: FraudLensRetrainRecommended
+        expr: fraudlens_monitoring_retrain_recommended == 1
+        for: 5m
+        labels: {severity: warning}
+        annotations: {summary: "Monitoring policy recommends retraining (drift or performance below floor)"}
+      - alert: FraudLensAlertRateSpike
+        expr: sum(rate(fraudlens_alerts_total[15m])) / clamp_min(sum(rate(fraudlens_transactions_scored_total[15m])), 1e-9) > 0.05
+        for: 10m
+        labels: {severity: warning}
+        annotations: {summary: "More than 5% of scored transactions are being flagged"}
+      - alert: FraudLensSlowScoring
+        expr: histogram_quantile(0.95, sum(rate(fraudlens_request_seconds_bucket{endpoint="/score"}[5m])) by (le)) > 0.25
+        for: 5m
+        labels: {severity: warning}
+        annotations: {summary: "95th percentile scoring latency above 250 ms"}

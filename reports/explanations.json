@@ -1,0 +1,83 @@
+{
+  "explainer": "permutation",
+  "treeshap_additivity_error": 14.16344,
+  "rows_explained": 3000,
+  "alerts_explained": 2851,
+  "mean_abs_shap": {
+    "amount": 2.82642,
+    "category": 1.22295,
+    "amt_sum_24h": 1.16358,
+    "is_night": 0.66256,
+    "txn_count_7d": 0.55028,
+    "amt_sum_1h": 0.45934,
+    "txn_count_24h": 0.40706,
+    "secs_since_last_txn": 0.3865,
+    "hour": 0.31668,
+    "amt_sum_7d": 0.31558,
+    "log_city_pop": 0.22648,
+    "age": 0.20479,
+    "amt_to_card_mean": 0.16953,
+    "amt_zscore_card": 0.15796,
+    "day_of_week": 0.10355,
+    "category_share_card": 0.07227,
+    "txn_count_1h": 0.06483,
+    "gender": 0.03388,
+    "log_amount": 0.0,
+    "is_weekend": 0.0
+  },
+  "local_examples": {
+    "caught_fraud": {
+      "transaction_id": "f5734f41ee6d1da587fac82c3c9d6101",
+      "score": 1.0,
+      "top": [
+        {
+          "feature": "amount",
+          "shap": 6.7675
+        },
+        {
+          "feature": "amt_sum_24h",
+          "shap": 2.5637
+        },
+        {
+          "feature": "txn_count_1h",
+          "shap": 1.056
+        },
+        {
+          "feature": "category",
+          "shap": -0.8749
+        },
+        {
+          "feature": "is_night",
+          "shap": 0.8417
+        }
+      ]
+    },
+    "false_alert": {
+      "transaction_id": "651f0caa20f26a45432d4faafae9005c",
+      "score": 0.9988,
+      "top": [
+        {
+          "feature": "amt_sum_24h",
+          "shap": 2.8085
+        },
+        {
+          "feature": "category",
+          "shap": 1.4944
+        },
+        {
+          "feature": "amount",
+          "shap": 1.3343
+        },
+        {
+          "feature": "secs_since_last_txn",
+          "shap": 1.1169
+        },
+        {
+          "feature": "is_night",
+          "shap": 0.9461
+        }
+      ]
+    }
+  },
+  "note": "SHAP values are in log-odds units; positive pushes towards fraud."
+}

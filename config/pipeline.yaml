@@ -1,86 +1,140 @@
-# Pipeline configuration for the Sparkov credit card fraud dataset.
-# All paths are relative to the project root.
+# FraudLens configuration. Paths are relative to the project root.
+# Secrets (MinIO keys, Kaggle token) come from environment variables or .env, never from this file.
 
+project:
+  name: FraudLens
+  version: 2.0.0
+
+# ---------------- Stage 1: problem understanding (success criteria) ----------------
+success_criteria:
+  min_test_recall: 0.90            # catch at least 90% of fraud in the unseen test period
+  min_test_precision: 0.50         # at least half of alerts are real fraud
+  max_alerts_per_day: 20           # what a small review team can clear
+  min_pr_auc_lift: 50              # PR-AUC at least 50x the random baseline
+
+# ---------------- Stage 2: data acquisition ----------------
 dataset:
   kaggle_slug: kartik2112/fraud-detection
+  source_url: https://www.kaggle.com/datasets/kartik2112/fraud-detection
+  licence: CC0-1.0
   files:
     train: fraudTrain.csv
     test: fraudTest.csv
 
-paths:
-  raw: data/raw          # bronze: untouched source files + manifest
-  silver: data/silver    # cleaned, typed, PII-reduced transactions
-  gold: data/gold        # model-ready feature tables + dashboard table
-  reports: reports       # validation and profiling reports
-  figures: reports/figures      # EDA charts (Step 3)
-  processed: data/processed     # model-ready matrices (Step 3)
-  artifacts: artifacts          # fitted preprocessors (Step 3)
-
+# ---------------- Stage 3: data preparation ----------------
 split:
-  # Kaggle's fraudTest.csv already continues fraudTrain.csv in time.
-  # We carve the last N weeks of fraudTrain.csv out as a validation set.
+  # fraudTest.csv continues fraudTrain.csv in time; the last N weeks of
+  # fraudTrain.csv become the validation set.
   validation_weeks: 6
 
 features:
-  # Rolling per-card windows (label: seconds). Only PRIOR transactions count.
-  velocity_windows:
+  velocity_windows:          # per-card look-back windows; only PRIOR transactions count
     1h: 3600
     24h: 86400
     7d: 604800
   night_hours: [22, 23, 0, 1, 2, 3]
 
 privacy:
-  # Direct identifiers removed in the silver layer.
-  drop_columns: [first, last, street]
-  # cc_num is replaced by a salted SHA-256 card_id.
-  # Set the salt via this environment variable; a default is used otherwise.
-  hash_salt_env: CARD_HASH_SALT
+  drop_columns: [first, last, street]   # direct identifiers removed in silver
+  hash_salt_env: CARD_HASH_SALT          # cc_num -> salted SHA-256 card_id
 
 storage:
-  format: parquet        # falls back to csv if pyarrow is not installed
+  format: parquet
 
-# ---------------- Step 3: cleaning audit, EDA, preprocessing ----------------
-eda:
-  sample_rows: 300000      # rows sampled for correlation / signal ranking
-  min_state_txns: 5000     # ignore states with fewer training transactions
-  corr_threshold: 0.85     # flag feature pairs above this |Spearman rho|
+quality:
   near_duplicate_seconds: 60
 
+# ---------------- Stage 4: exploratory data analysis ----------------
+eda:
+  sample_rows: 300000
+  min_state_txns: 5000
+  corr_threshold: 0.85
+
+# ---------------- Stage 5: modelling ----------------
 preprocess:
-  winsor_quantiles: [0.001, 0.999]   # clipping for scale-sensitive models only
+  winsor_quantiles: [0.001, 0.999]
   save_matrices: true
-  # Left out of the model matrices. Running totals only ever grow, so later
-  # periods contain values never seen in training. Review
-  # reports/preprocessing_report.json -> validation_drift_psi before adding more.
   exclude_features:
-    - card_prior_txn_count      # running total: grows over time
-    - card_prior_category_count # running total: grows over time
+    - card_prior_txn_count      # running total: grows over time (PSI 5.4)
+    - card_prior_category_count # running total: grows over time (PSI 1.5)
     - distance_km               # no signal (AUC 0.502): merchant location is random
     - is_new_merchant_for_card  # drifts (validation PSI 0.39) and weak (AUC 0.58)
 
-# ---------------- Step 4: model development ----------------
 model:
   random_state: 42
-  # Available: logistic, hist_gb, isolation_forest, hybrid_gb, mlp
-  # mlp is a neural net; it is slow, so it is off by default.
-  models: [logistic, hist_gb, isolation_forest, hybrid_gb]
-  max_train_rows: null        # set e.g. 200000 for a fast trial run
-  mlp_max_train_rows: 300000  # the neural net trains on a stratified subsample
-  isolation_forest:
-    n_estimators: 200
-    max_samples: 256          # standard setting; keeps it fast on millions of rows
-  permutation_importance_rows: 50000
-
-  # Champion selection (see src/fraud_pipeline/selection.py): the simplest
-  # model that is NON-INFERIOR to the best on validation PR-AUC, i.e. the upper
-  # 95% bootstrap bound of its gap is below `selection_margin`.
-  complexity_order: [logistic, hist_gb, mlp, hybrid_gb]
+  # logistic | hist_gb | xgboost | lightgbm | isolation_forest | hybrid_gb
+  models: [logistic, hist_gb, xgboost, lightgbm, isolation_forest, hybrid_gb]
+  # Simplest first. hist_gb needs only scikit-learn; xgboost/lightgbm add a
+  # dependency; the hybrid needs an Isolation Forest scored before every prediction.
+  complexity_order: [logistic, hist_gb, lightgbm, xgboost, hybrid_gb]
   selection_bootstrap: 500
   selection_margin: 0.01
-
+  max_train_rows: null              # e.g. 200000 for a quick trial run
+  isolation_forest:
+    n_estimators: 200
+    max_samples: 256
+  tuning:
+    enabled: true
+    n_iter: 8                       # random-search candidates per model
+    cv_folds: 3                     # expanding-window time-series folds inside TRAIN
+    legit_sample_frac: 0.2          # tuning uses all fraud + 20% of legitimate rows
+    models: [hist_gb, xgboost, lightgbm]
   threshold:
-    # Thresholds are chosen on VALIDATION and applied once to test.
-    primary: min_cost         # max_f1 | alert_budget | min_cost
-    alerts_per_day: 50        # for the alert_budget strategy
-    investigation_cost: 15    # cost of reviewing one alert
-    recovery_rate: 0.9        # share of a caught fraud's amount that is saved
+    primary: min_cost               # max_f1 | alert_budget | min_cost (chosen on VALIDATION)
+    alerts_per_day: 50
+    investigation_cost: 15          # $ per reviewed alert (assumption)
+    recovery_rate: 0.9              # share of a caught fraud's value that is saved (assumption)
+
+# ---------------- Stage 6: evaluation and interpretation ----------------
+evaluation:
+  bootstrap: 300                    # resamples for test-metric confidence intervals
+  permutation_importance_rows: 50000
+  shap_rows: 3000                   # rows explained for the global SHAP summary (20% fraud)
+
+# ---------------- Stage 8: monitoring and improvement ----------------
+monitoring:
+  reference: train                  # drift reference
+  window: M                         # monthly windows over the scored periods
+  drift_share_alert: 0.3            # retrain if >30% of monitored features drift
+  recall_floor: 0.85                # retrain if monthly recall falls below this
+  precision_floor: 0.40
+  features:                         # monitored model inputs
+    - amount
+    - hour
+    - age
+    - log_city_pop
+    - secs_since_last_txn
+    - amt_to_card_mean
+    - amt_zscore_card
+    - txn_count_1h
+    - txn_count_24h
+    - txn_count_7d
+    - amt_sum_24h
+    - amt_sum_7d
+    - category_share_card
+    - category
+
+# ---------------- Data platform (Docker) ----------------
+platform:
+  s3_endpoint: http://localhost:9000
+  s3_access_key: fraudlens-pipeline       # overridden by FRAUDLENS_S3_ACCESS_KEY
+  s3_secret_key: change-me-pipeline       # overridden by FRAUDLENS_S3_SECRET_KEY
+  buckets: {raw: fraudlens-raw, silver: fraudlens-silver, gold: fraudlens-gold}
+  trino_host: localhost
+  trino_port: 8080
+  trino_user: pipeline
+  trino_catalog: hive
+  mlflow_tracking_uri: null               # e.g. http://localhost:5000; default ./mlruns
+  mlflow_experiment: fraudlens
+  registered_model: fraudlens-champion
+  # How raw files reach the lake: direct (boto3 upload) or nifi (Apache NiFi flow,
+  # docker compose --profile ingest). Overridden by FRAUDLENS_INGEST.
+  ingest: direct
+  nifi_landing: data/landing              # bind-mounted into the NiFi container as /landing
+  nifi_timeout_s: 900
+  # ClickHouse (OLAP serving of the gold layer, docker compose --profile olap)
+  clickhouse_url: http://localhost:8123   # overridden by FRAUDLENS_CLICKHOUSE_URL
+  clickhouse_user: fraudlens              # overridden by FRAUDLENS_CLICKHOUSE_USER
+  clickhouse_password: change-me-clickhouse   # overridden by FRAUDLENS_CLICKHOUSE_PASSWORD
+  clickhouse_database: fraudlens
+  benchmark_repeats: 5
