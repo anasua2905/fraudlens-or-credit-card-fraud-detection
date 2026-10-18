@@ -28,6 +28,17 @@ HTTP = {
 JOBS = {"minio-init", "nifi-init"}            # one-shot containers: must exit 0
 
 
+def show_logs(service: str, tail: int) -> None:
+    """Print a service's log and repeat its last lines as an annotation (visible without the log)."""
+    out = subprocess.run(["docker", "compose", "logs", "--no-color", "--tail", str(tail), service],
+                         cwd=PLATFORM, capture_output=True, text=True)
+    text = (out.stdout or "") + (out.stderr or "")
+    print(text, flush=True)
+    last = [ln.split("|", 1)[-1].strip() for ln in text.splitlines() if ln.strip()][-25:]
+    msg = "%0A".join(ln.replace("%", "%25").replace("\r", "") for ln in last)[:4000]
+    print(f"::error title={service} log::{msg}", flush=True)
+
+
 def job_state(service: str) -> tuple[str, int | None]:
     out = subprocess.run(["docker", "compose", "ps", "-a", "--format", "json", service], cwd=PLATFORM,
                          capture_output=True, text=True).stdout.strip()
@@ -63,7 +74,7 @@ def main() -> int:
             r = ready(s)
             if r is None:
                 print(f"::error title={s} failed::{s} exited with an error; see its log below")
-                subprocess.run(["docker", "compose", "logs", "--no-color", "--tail", "80", s], cwd=PLATFORM)
+                show_logs(s, 80)
                 return 1
             if r:
                 print(f"ready: {s} after {time.time() - t0:.0f}s", flush=True)
@@ -71,7 +82,7 @@ def main() -> int:
         if pending and time.time() - t0 > a.timeout:
             print(f"::error title=timeout::not ready after {a.timeout}s: {pending}")
             for s in pending:
-                subprocess.run(["docker", "compose", "logs", "--no-color", "--tail", "60", s], cwd=PLATFORM)
+                show_logs(s, 60)
             return 1
         time.sleep(5)
     return 0
