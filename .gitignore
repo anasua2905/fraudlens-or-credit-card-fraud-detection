@@ -25,3 +25,4 @@ Thumbs.db
 data/landing/
 _agent/
 reports/platform-logs/
+catboost_info/

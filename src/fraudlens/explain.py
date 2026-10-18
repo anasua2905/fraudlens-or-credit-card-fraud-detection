@@ -15,7 +15,6 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from . import viz
 from .datasets import load_features
 from .scoring import FraudModel
 from .utils import get_logger, load_config, write_json, write_table
@@ -105,6 +104,8 @@ def _num(v):
 def run_explain(cfg: dict) -> dict:
     import matplotlib.pyplot as plt
     import shap
+
+    from . import viz          # plotting stack only for the batch stage; serving needs just shap
 
     figs = cfg["paths"]["figures"]
     fm = FraudModel.load(cfg["paths"]["artifacts"] / "fraudlens_model.joblib")

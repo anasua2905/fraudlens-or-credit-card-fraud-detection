@@ -1,0 +1,29 @@
+{
+ "comparison": [
+  {
+   "model": "champion (train)",
+   "pr_auc": 0.9698,
+   "recall": 0.9622,
+   "precision": 0.724,
+   "alerts_per_day": 14.7,
+   "net_benefit": 964181.86
+  },
+  {
+   "model": "challenger (train + val)",
+   "pr_auc": 0.9741,
+   "recall": 0.9692,
+   "precision": 0.7292,
+   "alerts_per_day": 14.7,
+   "net_benefit": 965480.74
+  }
+ ],
+ "pr_auc_gap_challenger_minus_champion": {
+  "gap_mean": 0.00434,
+  "ci95_low": 0.00279,
+  "ci95_high": 0.00571,
+  "equivalent_to_best": true,
+  "n_boot": 300
+ },
+ "promote": true,
+ "rule": "non-inferior PR-AUC (95% bootstrap lower bound of the gap > -0.01)"
+}

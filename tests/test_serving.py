@@ -92,3 +92,13 @@ def test_monitoring_summary_and_policy(project):
     assert s["months"] == len(s["monthly"]) >= 2
     for row in s["monthly"]:
         assert row["retrain_recommended"] == bool(row["reasons"])
+
+
+def test_serving_path_does_not_need_the_plotting_stack():
+    """The hosted dashboard installs only dashboard/requirements.txt (no seaborn/matplotlib)."""
+    import subprocess
+    import sys
+    code = ("import sys; import fraudlens.runtime, fraudlens.dashboard_data, fraudlens.explain; "
+            "bad = [m for m in ('seaborn', 'matplotlib') if m in sys.modules]; print(bad); sys.exit(1 if bad else 0)")
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr

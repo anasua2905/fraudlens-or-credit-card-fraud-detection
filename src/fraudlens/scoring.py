@@ -49,6 +49,10 @@ class FraudModel:
             X = pd.DataFrame(X, columns=self.preprocessor.get_feature_names_out(), index=df.index)
         # Same representation as the stored training matrices (see preprocess.MATRIX_DTYPE).
         X = X.astype(MATRIX_DTYPE)
+        if self.view == "linear":
+            # Training matrices of the linear view never contain NaN; a brand-new card can lack
+            # customer fields (age, city size), so fall back to the standardised mean (0).
+            X = X.fillna(0.0)
         for c in M.CATEGORICAL_IN_TREE_VIEW:
             if self.view == "tree" and c in X.columns:
                 X[c] = X[c].fillna(-1).astype("int32")

@@ -72,6 +72,11 @@ def money(x) -> str:
     return "n/a" if x is None or (isinstance(x, float) and math.isnan(x)) else f"${x:,.0f}"
 
 
+def md_money(x) -> str:
+    """money() for st.markdown, where a bare $ starts LaTeX maths."""
+    return money(x).replace("$", "\\$")
+
+
 def pct(x) -> str:
     return "n/a" if x is None or (isinstance(x, float) and math.isnan(x)) else f"{x:.1%}"
 
@@ -169,16 +174,18 @@ with tabs[0]:
     c[2].metric("False alarms per catch", k["false_alarms_per_catch"] if k["false_alarms_per_catch"] is not None else "n/a")
     c[3].metric("Net benefit", money(k["net_benefit"]), help="Recovered fraud value minus review cost")
 
-    caught_share = k["fraud_amount_caught"] / max(k["fraud_amount_caught"] + k["fraud_amount_missed"], 1)
+    fraud_value = float(df.loc[df["is_fraud"] == 1, "amount"].sum())
+    caught_value = float(df.loc[(df["is_fraud"] == 1) & (df["score"] >= threshold), "amount"].sum())
+    caught_share = caught_value / max(fraud_value, 1)
     seg_cat = D.segment(df, threshold, "category")
     worst = seg_cat.sort_values("false_alert", ascending=False).iloc[0]
     hour_seg = D.segment(df, threshold, "hour")
     peak = hour_seg.sort_values("fraud_rate_pct", ascending=False).head(3)["hour"].astype(int).tolist()
     st.markdown(
         f"**What this period says.** The model flagged **{k['alerts_per_day']} transactions a day** and "
-        f"stopped **{caught_share:.0%} of the fraud value** ({money(k['fraud_amount_caught'])} of "
-        f"{money(k['fraud_amount_caught'] + k['fraud_amount_missed'])}). Reviews cost {money(k['review_cost'])}, "
-        f"so the net benefit is **{money(k['net_benefit'])}**. Most false alerts come from **{worst['category']}** "
+        f"caught **{caught_share:.1%} of the fraud value** ({md_money(caught_value)} of {md_money(fraud_value)}; "
+        f"{recovery:.0%} of it recovered = {md_money(k['fraud_amount_caught'])}). Reviews cost {md_money(k['review_cost'])}, "
+        f"so the net benefit is **{md_money(k['net_benefit'])}**. Most false alerts come from **{worst['category']}** "
         f"({int(worst['false_alert'])}); fraud is most concentrated at **{', '.join(f'{h:02d}:00' for h in peak)}**.")
 
     d = D.daily(df, threshold)
@@ -347,18 +354,24 @@ with tabs[3]:
     if sw.empty:
         st.info("No fraud in the filtered data, so the trade-off cannot be drawn.")
     else:
-        current_x = math.log10(max(k["alerts_per_day"], 1e-3))   # log axis: shapes use log10 units
+        current_x = max(k["alerts_per_day"], 1e-3)
+
+        def mark_current(fig, y0, y1):
+            # a dashed two-point trace instead of add_vline: vline shapes on log axes land in the wrong place
+            fig.add_scatter(x=[current_x, current_x], y=[y0, y1], mode="lines+text", text=["", "current"],
+                            textposition="top center", line=dict(color=MUTED, dash="dot", width=1.5),
+                            showlegend=False, hoverinfo="skip")
         c = st.columns(2)
         fig = go.Figure()
         fig.add_scatter(x=sw["alerts_per_day"], y=sw["precision"], name="Precision", line=dict(color=SERIES[0], width=2))
         fig.add_scatter(x=sw["alerts_per_day"], y=sw["recall"], name="Recall", line=dict(color=SERIES[1], width=2))
-        fig.add_vline(x=current_x, line_dash="dot", line_color=MUTED, annotation_text="current")
+        mark_current(fig, 0, 1)
         fig.update_layout(xaxis_type="log", xaxis_title="Alerts per day", yaxis_title="Rate", yaxis_range=[0, 1.05])
         with c[0]:
             chart(layout(fig, "Precision and recall by alert volume"))
         fig = go.Figure()
         fig.add_scatter(x=sw["alerts_per_day"], y=sw["net_benefit"], name="Net benefit", line=dict(color=SERIES[0], width=2))
-        fig.add_vline(x=current_x, line_dash="dot", line_color=MUTED, annotation_text="current")
+        mark_current(fig, min(0, float(sw["net_benefit"].min())), float(sw["net_benefit"].max()))
         fig.add_hline(y=0, line_color=MUTED)
         fig.update_layout(xaxis_type="log", xaxis_title="Alerts per day", yaxis_title="Net benefit ($)", showlegend=False)
         with c[1]:
@@ -376,7 +389,7 @@ with tabs[3]:
         be = D.break_even_cost(df, thr_opts["alert_budget"], meta["threshold"], recovery)
         if be is not None:
             st.info(f"Lowering the threshold from the model default to the alert-budget point pays for itself only "
-                    f"if a review costs less than **${be:,.2f}**. Current assumption: ${cost:,.2f} per review.")
+                    f"if a review costs less than **\\${be:,.2f}**. Current assumption: \\${cost:,.2f} per review.")
 
 # ================================================================= patterns
 with tabs[4]:
@@ -562,7 +575,7 @@ with tabs[8]:
                "categories": categories, "states": states, "cost": cost, "recovery": recovery}
     cat_seg = seg_cat.sort_values("false_alert", ascending=False)
     md = D.summary_markdown(k, filters, meta, cat_seg)
-    st.markdown(md)
+    st.markdown(md.replace("$", "\\$"))      # a bare $ would start LaTeX maths in st.markdown
     c = st.columns(2)
     c[0].download_button("Download summary (Markdown)", md.encode(), file_name="fraudlens_summary.md",
                          mime="text/markdown")
