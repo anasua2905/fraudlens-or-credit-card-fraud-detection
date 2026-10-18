@@ -51,12 +51,12 @@ def main() -> int:
     root_user, root_pw = os.environ["MINIO_ROOT_USER"], os.environ["MINIO_ROOT_PASSWORD"]
     s3 = Minio(endpoint, access_key=root_user, secret_key=root_pw, secure=False)
 
-    for attempt in range(30):                      # wait for the server
+    for attempt in range(90):                      # wait for the server (up to 3 minutes)
         try:
             s3.list_buckets()
             break
         except Exception as exc:
-            print(f"waiting for MinIO at {endpoint} ({type(exc).__name__})")
+            print(f"waiting for MinIO at {endpoint} ({type(exc).__name__}: {str(exc)[:200]})", flush=True)
             time.sleep(2)
     else:
         print("MinIO did not become ready", file=sys.stderr)
