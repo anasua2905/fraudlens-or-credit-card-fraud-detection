@@ -1,0 +1,44 @@
+# Continuous integration: unit and end-to-end tests of the whole lifecycle on synthetic
+# sample data, plus a check that the committed dashboard bundle renders.
+name: ci
+
+on:
+  push:
+    branches: [main, final-a4]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: tests (Python 3.11)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.lock.txt
+      - name: Install (versions pinned by requirements.lock.txt)
+        run: pip install -c requirements.lock.txt -e ".[ml,serve,platform,dev]"
+      - name: Byte-compile everything
+        run: python -m compileall -q src dashboard scripts platform
+      - name: Tests (sample data, full lifecycle)
+        run: pytest -q --junitxml=reports/junit.xml
+      - name: Dashboard renders from the committed bundle
+        run: python scripts/ci/check_dashboard.py
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: reports/
+          if-no-files-found: ignore
