@@ -1,19 +1,28 @@
-# Data never goes into git (the raw files are ~500 MB)
-data/raw/*
-data/silver/*
-data/gold/*
-data/processed/*
-!data/**/.gitkeep
-
-# Python
-__pycache__/
-*.py[cod]
-*.egg-info/
-.venv/
+# data (download with: python -m fraudlens.acquire)
+data/
+!data/.gitkeep
+artifacts/
+mlruns/
+reports/monitoring/*.html
+!reports/monitoring/drift_2020-12.html
+reports/monitoring/*.parquet
+*.joblib
+!dashboard/bundle/*.joblib
+.venv*/
 venv/
+__pycache__/
+*.pyc
 .pytest_cache/
 .ipynb_checkpoints/
-
-# Secrets
 .env
-kaggle.json
+platform/.env
+*.egg-info/
+.DS_Store
+Thumbs.db
+
+# run logs and local platform state
+*.log
+data/landing/
+_agent/
+reports/platform-logs/
+catboost_info/

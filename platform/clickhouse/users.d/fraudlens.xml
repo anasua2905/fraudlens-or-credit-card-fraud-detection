@@ -1,0 +1,16 @@
+<!-- The FraudLens analytics user. The password comes from the container
+     environment (FRAUDLENS_CH_PASSWORD, set from CLICKHOUSE_PASSWORD in platform/.env). -->
+<clickhouse>
+    <users>
+        <fraudlens>
+            <password from_env="FRAUDLENS_CH_PASSWORD"/>
+            <networks><ip>::/0</ip></networks>
+            <profile>default</profile>
+            <quota>default</quota>
+            <access_management>1</access_management>
+            <named_collection_control>1</named_collection_control>
+            <show_named_collections>1</show_named_collections>
+            <show_named_collections_secrets>0</show_named_collections_secrets>
+        </fraudlens>
+    </users>
+</clickhouse>

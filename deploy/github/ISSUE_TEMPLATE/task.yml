@@ -1,0 +1,40 @@
+name: Lifecycle task
+description: A piece of work in one stage of the data science lifecycle
+title: "[stage] short description"
+labels: ["type: feature"]
+body:
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Lifecycle stage
+      options:
+        - 1 Problem understanding
+        - 2 Data acquisition
+        - 3 Data preparation
+        - 4 EDA
+        - 5 Modelling
+        - 6 Evaluation & interpretation
+        - 7 Deployment & visualisation
+        - 8 Monitoring & improvement
+        - Data platform
+        - Deliverables
+    validations: {required: true}
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should be true when this is done, and why it matters
+    validations: {required: true}
+  - type: textarea
+    id: done
+    attributes:
+      label: Acceptance criteria
+      description: A checklist; the task is done when every box is ticked
+      value: |
+        - [ ] 
+        - [ ] Tests / verification updated
+        - [ ] Docs or notebook updated
+  - type: input
+    id: links
+    attributes:
+      label: Related files, notebooks or issues

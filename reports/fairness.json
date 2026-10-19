@@ -1,0 +1,74 @@
+[
+ {
+  "group":"gender",
+  "value":"F",
+  "transactions":304886.0,
+  "frauds":1164.0,
+  "recall":0.947,
+  "false_alarm_rate_per_10k":15.67,
+  "precision":0.698
+ },
+ {
+  "group":"gender",
+  "value":"M",
+  "transactions":250833.0,
+  "frauds":981.0,
+  "recall":0.981,
+  "false_alarm_rate_per_10k":12.45,
+  "precision":0.756
+ },
+ {
+  "group":"age band",
+  "value":"<25",
+  "transactions":46931.0,
+  "frauds":153.0,
+  "recall":0.993,
+  "false_alarm_rate_per_10k":15.82,
+  "precision":0.673
+ },
+ {
+  "group":"age band",
+  "value":"25-34",
+  "transactions":113806.0,
+  "frauds":427.0,
+  "recall":0.96,
+  "false_alarm_rate_per_10k":17.82,
+  "precision":0.67
+ },
+ {
+  "group":"age band",
+  "value":"35-44",
+  "transactions":120059.0,
+  "frauds":386.0,
+  "recall":0.959,
+  "false_alarm_rate_per_10k":16.38,
+  "precision":0.654
+ },
+ {
+  "group":"age band",
+  "value":"45-54",
+  "transactions":115736.0,
+  "frauds":427.0,
+  "recall":0.944,
+  "false_alarm_rate_per_10k":13.36,
+  "precision":0.724
+ },
+ {
+  "group":"age band",
+  "value":"55-64",
+  "transactions":68556.0,
+  "frauds":342.0,
+  "recall":0.968,
+  "false_alarm_rate_per_10k":12.31,
+  "precision":0.798
+ },
+ {
+  "group":"age band",
+  "value":"65+",
+  "transactions":90631.0,
+  "frauds":410.0,
+  "recall":0.971,
+  "false_alarm_rate_per_10k":8.53,
+  "precision":0.838
+ }
+]

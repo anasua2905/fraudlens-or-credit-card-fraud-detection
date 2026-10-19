@@ -1,0 +1,169 @@
+{
+  "dataset": "kartik2112/fraud-detection",
+  "description": "Simulated credit card transactions (Sparkov generator), 1 Jan 2019 - 31 Dec 2020, 1,000 customers and 800 merchants, labelled is_fraud.",
+  "licence": "CC0-1.0",
+  "source_url": "https://www.kaggle.com/datasets/kartik2112/fraud-detection",
+  "columns": [
+    {
+      "column": "Unnamed: 0",
+      "inferred_dtype": "int64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 100000,
+      "example": "0"
+    },
+    {
+      "column": "trans_date_trans_time",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 98825,
+      "example": "2019-01-01 00:00:18"
+    },
+    {
+      "column": "cc_num",
+      "inferred_dtype": "int64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 922,
+      "example": "2703186189652095"
+    },
+    {
+      "column": "merchant",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 693,
+      "example": "fraud_Rippin, Kub and Mann"
+    },
+    {
+      "column": "category",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 14,
+      "example": "misc_net"
+    },
+    {
+      "column": "amt",
+      "inferred_dtype": "float64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 21184,
+      "example": "4.97"
+    },
+    {
+      "column": "first",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 341,
+      "example": "Jennifer"
+    },
+    {
+      "column": "last",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 470,
+      "example": "Banks"
+    },
+    {
+      "column": "gender",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 2,
+      "example": "F"
+    },
+    {
+      "column": "street",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 922,
+      "example": "561 Perry Cove"
+    },
+    {
+      "column": "city",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 848,
+      "example": "Moravian Falls"
+    },
+    {
+      "column": "state",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 50,
+      "example": "NC"
+    },
+    {
+      "column": "zip",
+      "inferred_dtype": "int64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 911,
+      "example": "28654"
+    },
+    {
+      "column": "lat",
+      "inferred_dtype": "float64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 909,
+      "example": "36.0788"
+    },
+    {
+      "column": "long",
+      "inferred_dtype": "float64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 910,
+      "example": "-81.1781"
+    },
+    {
+      "column": "city_pop",
+      "inferred_dtype": "int64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 833,
+      "example": "3495"
+    },
+    {
+      "column": "job",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 479,
+      "example": "Psychologist, counselling"
+    },
+    {
+      "column": "dob",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 908,
+      "example": "1988-03-09"
+    },
+    {
+      "column": "trans_num",
+      "inferred_dtype": "str",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 100000,
+      "example": "0b242abb623afc578575680df30655b9"
+    },
+    {
+      "column": "unix_time",
+      "inferred_dtype": "int64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 98825,
+      "example": "1325376018"
+    },
+    {
+      "column": "merch_lat",
+      "inferred_dtype": "float64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 99684,
+      "example": "36.011293"
+    },
+    {
+      "column": "merch_long",
+      "inferred_dtype": "float64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 99878,
+      "example": "-82.048315"
+    },
+    {
+      "column": "is_fraud",
+      "inferred_dtype": "int64",
+      "null_pct_in_sample": 0.0,
+      "distinct_in_sample": 2,
+      "example": "0"
+    }
+  ]
+}

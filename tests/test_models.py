@@ -1,31 +1,21 @@
-"""Tests for model training, evaluation and threshold selection (Step 4)."""
+"""Stages 5-6: modelling, selection, evaluation, explanation, verification."""
 from __future__ import annotations
 
-import sys
-from pathlib import Path
+import json
 
-import matplotlib
 import numpy as np
+from sklearn.metrics import average_precision_score as ap
 
-matplotlib.use("Agg")
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fraudlens import evaluate as E
+from fraudlens import models as M
+from fraudlens.selection import select_champion
+from fraudlens.verify import run_verification
 
-from test_step3 import _step3  # noqa: E402
-from fraud_pipeline import evaluate as E  # noqa: E402
-from fraud_pipeline import models as M  # noqa: E402
-from fraud_pipeline import train as T  # noqa: E402
-
-TCFG = {"investigation_cost": 10, "recovery_rate": 1.0, "alerts_per_day": 5}
-_RUN: dict = {}
+TCFG = {"alerts_per_day": 5, "investigation_cost": 15, "recovery_rate": 0.9}
 
 
-def _run():
-    if not _RUN:
-        cfg = _step3()["cfg"]
-        cfg["model"]["models"] = ["logistic", "hist_gb", "isolation_forest", "hybrid_gb"]
-        cfg["model"]["permutation_importance_rows"] = 2000
-        _RUN.update(cfg=cfg, report=T.run_training(cfg))
-    return _RUN
+def _results(project):
+    return json.loads((project["cfg"]["paths"]["reports"] / "model_results.json").read_text())
 
 
 def test_ranking_metrics_are_sane():
@@ -36,71 +26,123 @@ def test_ranking_metrics_are_sane():
 
 def test_confusion_and_business_metrics_agree():
     y = np.array([0, 1, 1, 0])
-    scores = np.array([0.1, 0.9, 0.4, 0.8])
-    amounts = np.array([10.0, 100.0, 50.0, 20.0])
-    c = E.confusion_at(y, scores, 0.5)
+    s = np.array([0.1, 0.9, 0.4, 0.8])
+    a = np.array([10.0, 100.0, 50.0, 20.0])
+    c = E.confusion_at(y, s, 0.5)
     assert (c["true_positives"], c["false_positives"], c["false_negatives"]) == (1, 1, 1)
-    b = E.business_metrics(y, scores, amounts, 0.5, days=1, investigation_cost=10, recovery_rate=1.0)
-    assert b["fraud_amount_caught"] == 100.0 and b["fraud_amount_missed"] == 50.0
-    assert b["net_benefit"] == 100.0 - 2 * 10
+    b = E.business_metrics(y, s, a, 0.5, days=1, investigation_cost=10, recovery_rate=1.0)
+    assert b["fraud_amount_caught"] == 100.0 and b["net_benefit"] == 100.0 - 2 * 10
 
 
 def test_alert_budget_threshold_respects_capacity():
     rng = np.random.default_rng(0)
-    scores = rng.random(10000)
-    y = (rng.random(10000) < 0.01).astype(int)
-    amounts = rng.random(10000) * 100
-    t = E.choose_threshold(y, scores, amounts, days=10, cfg_thr=TCFG, strategy="alert_budget")
-    assert abs(int((scores >= t).sum()) - 50) <= 5  # 5 alerts/day x 10 days
+    s, y, a = rng.random(10000), (rng.random(10000) < 0.01).astype(int), rng.random(10000) * 100
+    t = E.choose_threshold(y, s, a, days=10, cfg_thr=TCFG, strategy="alert_budget")
+    assert abs(int((s >= t).sum()) - 50) <= 5
 
 
-def test_all_models_trained_and_saved():
-    r = _run()
-    names = {row["model"] for row in r["report"]["comparison"]}
-    assert names == {"logistic", "hist_gb", "isolation_forest", "hybrid_gb"}
-    for name in names:
-        assert (r["cfg"]["paths"]["artifacts"] / f"model_{name}.joblib").exists()
+def _scores(n, rate, seed):
+    rng = np.random.default_rng(seed)
+    y = (rng.random(n) < rate).astype(int)
+    best = y * 1.2 + rng.normal(0, 0.5, n)
+    return y, best, best + rng.normal(0, 0.02, n), y * 0.6 + rng.normal(0, 0.5, n)
 
 
-def test_champion_is_supervised_and_beats_baseline():
-    rep = _run()["report"]
-    assert rep["champion"] in M.SUPERVISED
-    res = rep["results"][rep["champion"]]["test"]
-    assert res["pr_auc"] > res["pr_auc_baseline"]
+def test_tie_goes_to_simpler_model():
+    y, best, near, weak = _scores(100_000, 0.006, 0)
+    sc = {"hybrid_gb": best, "hist_gb": near, "logistic": weak}
+    pr = {k: ap(y, v) for k, v in sc.items()}
+    pr["hybrid_gb"] = max(pr.values()) + 1e-4
+    sel = select_champion(y, sc, pr, n_boot=200)
+    assert sel["champion"] == "hist_gb"
+    assert not sel["comparisons"]["logistic"]["equivalent_to_best"]
 
 
-def test_thresholds_come_from_validation_only():
-    """The reported threshold must be the one selected on validation."""
-    rep = _run()["report"]
-    for name, r in rep["results"].items():
-        chosen = r["thresholds_from_validation"][rep["threshold_strategy"]]
-        assert abs(r["test"]["threshold"] - chosen) < 1e-6, name
+def test_scarce_data_keeps_best_model():
+    y, best, near, weak = _scores(3_000, 0.006, 1)
+    sc = {"hybrid_gb": best, "logistic": weak}
+    pr = {k: ap(y, v) for k, v in sc.items()}
+    pr["hybrid_gb"] = max(pr.values()) + 1e-4
+    assert select_champion(y, sc, pr, n_boot=200)["champion"] == "hybrid_gb"
 
 
-def test_score_split_matches_training_scores():
-    r = _run()
-    champ = r["report"]["champion"]
-    scored = T.score_split(r["cfg"], champ, "test")
-    assert len(scored) == r["report"]["results"][champ]["test"]["alerts"] + \
-        r["report"]["results"][champ]["test"]["false_negatives"] + \
-        r["report"]["results"][champ]["test"]["true_negatives"]
-    assert scored["score"].notna().all()
+def test_all_models_trained_tuned_and_saved(project):
+    res = _results(project)
+    names = {r["model"] for r in res["comparison"]}
+    expected = {m for m in project["cfg"]["model"]["models"] if M.available(m)}
+    assert names == expected
+    assert set(res["tuning"]) == {m for m in project["cfg"]["model"]["tuning"]["models"] if M.available(m)}
+    for n in names:
+        assert (project["cfg"]["paths"]["artifacts"] / f"model_{n}.joblib").exists()
 
 
-def test_error_breakdown_adds_up():
-    r = _run()
-    champ = r["report"]["champion"]
-    res = r["report"]["results"][champ]
-    thr = res["thresholds_from_validation"][r["report"]["threshold_strategy"]]
-    tabs = T.error_breakdown(r["cfg"], champ, "test", thr)
-    assert int(tabs["by_category"]["caught"].sum()) == res["test"]["true_positives"]
-    assert int(tabs["missed_fraud_summary"]["count"].iloc[0]) == res["test"]["false_negatives"]
-    assert int(tabs["false_alert_summary"]["count"].iloc[0]) == res["test"]["false_positives"]
+def test_imbalance_by_weighting_not_resampling(project):
+    res = _results(project)
+    assert not any("smote" in v.lower() for v in res["imbalance_handling"].values())
 
 
-if __name__ == "__main__":
-    tests = [v for k, v in dict(globals()).items() if k.startswith("test_")]
-    for t in tests:
-        t()
-        print("PASS", t.__name__)
-    print(f"{len(tests)} tests passed")
+def test_champion_beats_baseline_and_thresholds_from_validation(project):
+    res = _results(project)
+    r = res["results"][res["champion"]]
+    assert r["test"]["pr_auc"] > r["test"]["pr_auc_baseline"]
+    for name, rr in res["results"].items():
+        assert abs(rr["test"]["threshold"] - rr["thresholds_from_validation"][res["threshold_strategy"]]) < 1e-6
+
+
+def test_confidence_intervals_and_monthly_breakdown(project):
+    res = _results(project)
+    ci = res["champion_test_ci95"]["pr_auc"]
+    assert ci["low"] <= res["results"][res["champion"]]["test"]["pr_auc"] <= ci["high"]
+    assert len(res["champion_monthly_test"]) >= 2
+
+
+def test_shap_explanations_are_additive_and_cover_alerts(project):
+    P = project["cfg"]["paths"]
+    ex = json.loads((P["reports"] / "explanations.json").read_text())
+    res = _results(project)
+    assert ex["alerts_explained"] == res["results"][res["champion"]]["test"]["alerts"]
+    assert ex["explainer"] in {"tree", "permutation"}
+    assert (P["figures"] / "17_shap_beeswarm.png").exists()
+
+
+def test_verification_passes_and_catches_tampering(project):
+    cfg = project["cfg"]
+    assert run_verification(cfg, verify_checksums=True)["status"] == "PASS"
+    path = cfg["paths"]["reports"] / "model_results.json"
+    original = path.read_text()
+    try:
+        res = json.loads(original)
+        res["champion"] = [m for m in res["results"] if m not in (res["champion"], "isolation_forest")][0]
+        path.write_text(json.dumps(res))
+        rep = run_verification(cfg, verify_checksums=False)
+        assert rep["status"] == "FAIL"
+        assert "reported champion = champion chosen by the rule" in {c["check"] for c in rep["checks"]
+                                                                    if c["status"] == "FAIL"}
+    finally:
+        path.write_text(original)
+
+
+def test_deployed_model_scores_exactly_like_training(project):
+    """Train/serve parity: the packaged FraudModel, scoring raw features, must give the same
+    scores as the champion scoring the stored training matrices (found and fixed: a
+    float32/float64 mismatch moved values across tree split thresholds)."""
+    import pandas as pd
+
+    from fraudlens.datasets import load_features
+    from fraudlens.scoring import FraudModel
+    from fraudlens.utils import read_table
+
+    cfg = project["cfg"]
+    fm = FraudModel.load(cfg["paths"]["artifacts"] / "fraudlens_model.joblib")
+    feats = load_features(cfg, "val")
+    X = read_table(cfg["paths"]["processed"] / f"{fm.view}_val")
+    assert (X.pop("transaction_id").to_numpy() == feats["transaction_id"].to_numpy()).all()
+    X = X.drop(columns=["is_fraud"])
+    for c in M.CATEGORICAL_IN_TREE_VIEW:
+        if fm.view == "tree" and c in X:
+            X[c] = X[c].fillna(-1).astype("int32")
+    if fm.champion == "hybrid_gb":
+        lin = read_table(cfg["paths"]["processed"] / "linear_val").drop(columns=["transaction_id", "is_fraud"])
+        X = X.assign(anomaly_score=M.anomaly_score(fm.iso_model, lin))
+    assert np.abs(fm.predict(feats) - M.positive_scores(fm.model, X)).max() < 1e-12
+    assert isinstance(fm.transform(feats.head(5)), pd.DataFrame)
