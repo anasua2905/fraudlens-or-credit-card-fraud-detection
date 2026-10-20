@@ -43,7 +43,7 @@ def _error_lines() -> list[str]:
 
 
 def install(title: str) -> None:
-    if not os.environ.get("GITHUB_ACTIONS"):
+    if not os.environ.get("GITHUB_ACTIONS") or isinstance(sys.stdout, _Tee):
         return
     sys.stdout, sys.stderr = _Tee(sys.stdout), _Tee(sys.stderr)
     previous = sys.excepthook

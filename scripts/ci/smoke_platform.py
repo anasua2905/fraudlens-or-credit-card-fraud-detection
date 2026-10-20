@@ -57,7 +57,10 @@ def check(group: str, name: str, retries: int = 1, wait: float = 5):
 def run(skip: set[str]) -> int:
     cfg = load_config()
     reports = cfg["paths"]["reports"]
-    ingest = cfg["platform"].get("ingest", "direct")
+    try:                         # the route the pipeline actually used (it can be overridden per run)
+        ingest = read_json(reports / "acquisition_manifest.json")["lake"]["ingested_by"]
+    except Exception:
+        ingest = cfg["platform"].get("ingest", "direct")
 
     # ------------------------------------------------------------ lake (MinIO)
     @check("lake", "three layer buckets exist")
