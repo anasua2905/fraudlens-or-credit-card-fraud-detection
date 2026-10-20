@@ -250,4 +250,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    ci_annotate.run(main, "governance")

@@ -46,3 +46,20 @@ def install(title: str) -> None:
         sys.__stdout__.flush()
 
     sys.excepthook = hook
+
+
+def run(main, title: str) -> None:
+    """Run main(); on a non-zero exit (returned, SystemExit or error) annotate the output tail."""
+    install(title)
+    try:
+        code = main()
+    except SystemExit as exc:
+        code = exc.code
+        if code not in (None, 0) and not isinstance(code, int):
+            print(code, file=sys.stderr)
+            code = 1
+    if code not in (None, 0) and os.environ.get("GITHUB_ACTIONS"):
+        sys.__stdout__.write(f"::error title={title} failed (exit {code})::"
+                             f"{_escape(chr(10).join(list(_TAIL)[-25:]))[:4000]}\n")
+        sys.__stdout__.flush()
+    sys.exit(code or 0)

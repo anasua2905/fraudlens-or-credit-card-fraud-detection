@@ -54,4 +54,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    ci_annotate.run(main, "sample pipeline")

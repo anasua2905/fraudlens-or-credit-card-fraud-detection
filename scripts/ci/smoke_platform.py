@@ -246,4 +246,5 @@ def run(skip: set[str]) -> int:
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--skip", nargs="*", default=[])
-    sys.exit(run(set(ap.parse_args().skip)))
+    skip = set(ap.parse_args().skip)
+    ci_annotate.run(lambda: run(skip), "smoke test")
