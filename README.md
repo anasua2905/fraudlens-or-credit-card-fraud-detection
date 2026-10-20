@@ -1,5 +1,9 @@
 # FraudLens
 
+[![ci](https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/workflows/ci.yml)
+[![platform](https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/workflows/platform.yml/badge.svg)](https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/workflows/platform.yml)
+[![deploy](https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/workflows/deploy.yml/badge.svg)](https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/workflows/deploy.yml)
+
 **An anomaly detection framework for fraudulent credit card transactions**, built end to end on open-source
 tools: from data acquisition to a deployed scoring API, an analyst dashboard and drift monitoring.
 
@@ -12,6 +16,7 @@ PRT661 (Charles Darwin University), Theme 3: Anomaly Detection and Intelligent M
 | Test period (Jun-Dec 2020, never used for any choice) | **recall 0.962**, **precision 0.724**, **14.7 alerts/day**, PR-AUC 0.970 (251× the random baseline) |
 | Business impact (test) | 98.7% of fraud dollars caught; net benefit $964k after $15/alert review cost |
 | Verification | 56/56 automated end-to-end checks pass (`reports/verification_report.json`) |
+| Data platform | runs end to end on a GitHub runner: 14/14 smoke checks pass, ClickHouse 14-23× faster than Trino with the same answers, OpenMetadata catalog with PII tags and lineage ([platform guide](docs/platform.md#latest-verified-run)) |
 
 ## The lifecycle, stage by stage
 

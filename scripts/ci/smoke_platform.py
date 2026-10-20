@@ -19,6 +19,9 @@ import urllib3
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
+import ci_annotate  # noqa: E402
+
+ci_annotate.install("smoke test")
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from fraudlens import lake  # noqa: E402
@@ -54,7 +57,10 @@ def check(group: str, name: str, retries: int = 1, wait: float = 5):
 def run(skip: set[str]) -> int:
     cfg = load_config()
     reports = cfg["paths"]["reports"]
-    ingest = cfg["platform"].get("ingest", "direct")
+    try:                         # the route the pipeline actually used (it can be overridden per run)
+        ingest = read_json(reports / "acquisition_manifest.json")["lake"]["ingested_by"]
+    except Exception:
+        ingest = cfg["platform"].get("ingest", "direct")
 
     # ------------------------------------------------------------ lake (MinIO)
     @check("lake", "three layer buckets exist")
@@ -237,10 +243,20 @@ def run(skip: set[str]) -> int:
             for r in RESULTS:
                 fh.write(f"| {r['group']} | {r['check']} | {'✅' if r['status'] == 'PASS' else '❌'} |\n")
     print(f"\n{out['status']}: {out['passed']}/{len(RESULTS)} checks passed")
+    ci_annotate.notice("platform smoke result", {"status": out["status"], "passed": out["passed"],
+                                                 "total": len(RESULTS),
+                                                 "checks": [[r["group"], r["check"], r["status"]] for r in RESULTS]})
+    olap = reports / "olap_benchmark.json"
+    if olap.exists():
+        rep = read_json(olap)
+        ci_annotate.notice("olap benchmark", {k: [v.get("clickhouse_ms", {}).get("median"),
+                                                   v.get("trino_ms", {}).get("median"), v.get("answers_agree")]
+                                               for k, v in rep.get("queries", {}).items()})
     return 0 if not failed else 1
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--skip", nargs="*", default=[])
-    sys.exit(run(set(ap.parse_args().skip)))
+    skip = set(ap.parse_args().skip)
+    ci_annotate.run(lambda: run(skip), "smoke test")

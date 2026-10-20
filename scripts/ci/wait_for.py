@@ -30,11 +30,13 @@ JOBS = {"minio-init", "nifi-init"}            # one-shot containers: must exit 0
 
 def show_logs(service: str, tail: int) -> None:
     """Print a service's log and repeat its last lines as an annotation (visible without the log)."""
-    out = subprocess.run(["docker", "compose", "logs", "--no-color", "--tail", str(tail), service],
+    out = subprocess.run(["docker", "compose", "logs", "--no-color", "--tail", str(max(tail, 400)), service],
                          cwd=PLATFORM, capture_output=True, text=True)
     text = (out.stdout or "") + (out.stderr or "")
     print(text, flush=True)
-    last = [ln.split("|", 1)[-1].strip() for ln in text.splitlines() if ln.strip()][-25:]
+    lines = [ln.split("|", 1)[-1].strip() for ln in text.splitlines() if ln.strip()]
+    marks = [i for i, ln in enumerate(lines) if "Traceback" in ln or "Error" in ln or "error" in ln.lower()[:40]]
+    last = lines[marks[0]:marks[0] + 25] if marks else lines[-25:]
     msg = "%0A".join(ln.replace("%", "%25").replace("\r", "") for ln in last)[:4000]
     print(f"::error title={service} log::{msg}", flush=True)
 

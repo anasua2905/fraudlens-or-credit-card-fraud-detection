@@ -21,6 +21,10 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 os.environ.setdefault("MLFLOW_DISABLE_AGENT_HINT", "1")
 
+import ci_annotate  # noqa: E402
+
+ci_annotate.install("sample pipeline")
+
 import matplotlib  # noqa: E402
 
 matplotlib.use("Agg")
@@ -48,6 +52,19 @@ def main() -> None:
     cfg["evaluation"].update(bootstrap=50, permutation_importance_rows=2000, shap_rows=300)
     run_all(cfg, stop=a.stop, source="local", local_dir=str(sample), strict=False)
 
+    # the platform stages report problems instead of raising; on CI they must fail the step
+    import json
+    catalog = json.loads((cfg["paths"]["reports"] / "data_catalog.json").read_text(encoding="utf-8"))
+    if catalog.get("status") != "registered":
+        raise SystemExit(f"crawler status {catalog.get('status')}: "
+                         f"{catalog.get('reason') or json.dumps(catalog.get('failures'))[:1500]}")
+    olap_report = cfg["paths"]["reports"] / "olap_benchmark.json"
+    if a.stop is None and olap_report.exists():
+        olap = json.loads(olap_report.read_text(encoding="utf-8"))
+        if olap.get("status") != "ok":
+            raise SystemExit(f"OLAP benchmark status {olap.get('status')}: "
+                             + json.dumps({k: v.get("answers_agree") for k, v in olap.get("queries", {}).items()}))
+
 
 if __name__ == "__main__":
-    main()
+    ci_annotate.run(main, "sample pipeline")

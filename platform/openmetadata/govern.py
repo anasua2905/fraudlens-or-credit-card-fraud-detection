@@ -28,6 +28,11 @@ import tempfile
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "ci"))
+import ci_annotate  # noqa: E402
+
+ci_annotate.install("governance")
+
 import requests
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -240,9 +245,13 @@ def main() -> int:
     report.update(read_back(om))
     (ROOT / "reports" / "governance_catalog.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
     print(json.dumps({k: (len(v) if isinstance(v, list) else v) for k, v in report.items()}, indent=1))
+    ci_annotate.notice("governance result", {"version": version, "tables": [t["fqn"] for t in report["tables"]],
+                                             "pii_columns": report["pii_columns"],
+                                             "upstream_of_scored": report["scored_transactions_upstream"],
+                                             "lineage_edges": len(report["lineage"])})
     ok = report["tables"] and report["pii_columns"] > 0 and report["scored_transactions_upstream"]
     return 0 if ok else 1
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    ci_annotate.run(main, "governance")

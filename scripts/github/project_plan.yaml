@@ -169,10 +169,10 @@ issues:
     stage: platform
     milestone: 3
     type: infra
-    status: in_progress
+    status: done
     body: |
       - [x] Compose file and `govern.py` (Trino metadata ingestion, PII tags, lineage)
-      - [ ] Verified on the CI runner (platform workflow, governance job)
+      - [x] Verified on the CI runner (platform workflow, governance job: 13 tables, 29 PII columns, 9 lineage edges)
   - title: "Monitoring: Evidently drift, Prometheus, Grafana, MLflow"
     stage: 8-monitoring
     milestone: 3
@@ -186,11 +186,11 @@ issues:
     stage: platform
     milestone: 3
     type: infra
-    status: in_progress
+    status: done
     body: |
       - [x] Workflows written (`deploy/github/workflows/`)
-      - [ ] Installed in `.github/workflows` (needs a maintainer with the `workflow` scope)
-      - [ ] Platform workflow green on the runner
+      - [x] Installed in `.github/workflows`
+      - [x] Platform workflow green on the runner (14/14 smoke checks)
   - title: "Deploy the anomaly detection system"
     stage: 7-deployment
     milestone: 3
@@ -234,8 +234,20 @@ issues:
     stage: deliverable
     milestone: 4
     type: infra
-    status: todo
+    status: in_progress
     priority: high
     body: |
-      - [ ] Review the pull request from `final-a4`
-      - [ ] Merge, tag `v2.0.0`
+      - [x] Review and merge pull request #1 from `final-a4`
+      - [ ] Merge the platform fixes, tag `v2.0.0`
+  - title: "Fix the Docker platform on the CI runner"
+    stage: platform
+    milestone: 3
+    type: bug
+    status: done
+    body: |
+      The platform workflow failed at MinIO set-up; each run then exposed the next problem.
+      - [x] `MinioAdmin` needs keyword arguments (minio-py 7.2.20)
+      - [x] MLflow server: one worker within its memory limit
+      - [x] Trino access rules: allow `sync_partition_metadata` for the pipeline
+      - [x] Crawler registers each table independently and reports failures
+      - [x] CI steps report errors and results as run annotations

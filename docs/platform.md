@@ -92,11 +92,53 @@ SELECT * FROM hive.raw.sparkov_train LIMIT 1;                 -- Access Denied
 
 ## 6. Automated end-to-end test
 
-`deploy/github/workflows/platform.yml` (once installed in `.github/workflows/`) starts all profiles on a GitHub
-runner, runs the lifecycle on sample data with NiFi ingest, and runs `scripts/ci/smoke_platform.py`, which
-checks every component (buckets and least privilege, NiFi records, catalog, Trino counts and masking, ClickHouse
-agreement with Trino, MLflow registry, API scoring, Prometheus scraping, Grafana datasources, Superset
-dashboard). A second job brings up OpenMetadata and runs `govern.py`.
+`.github/workflows/platform.yml` starts all profiles on a GitHub runner, runs the lifecycle on sample data with
+NiFi ingest, and runs `scripts/ci/smoke_platform.py`, which checks every component. A second job brings up
+OpenMetadata and runs `govern.py`. Each step reports failures as run annotations, and the results are published
+as notices; `python scripts/ci/collect_platform_results.py` saves them to `reports/platform_ci.json`.
+
+### Latest verified run
+
+[Run 39430878611](https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/runs/39430878611) on commit `a5c7b0d`: **both jobs passed**.
+
+| Component | Check | Result |
+|---|---|---|
+| lake | three layer buckets exist | pass |
+| lake | raw CSVs, silver and gold tables are in the lake | pass |
+| lake | analyst account cannot read the raw layer (least privilege) | pass |
+| ingest | NiFi flow is running and wrote an ingest record per file | pass |
+| catalog | crawler registered the lake tables in the Hive Metastore | pass |
+| trino | gold row count matches what the pipeline published | pass |
+| governance | Trino masks PII and hides `job` from the analyst role | pass |
+| governance | BI role cannot read the raw layer | pass |
+| olap | ClickHouse loaded gold and agrees with Trino | pass |
+| mlflow | MLflow server has the run and the registered champion | pass |
+| api | scoring API is healthy and scores a transaction | pass |
+| monitoring | Prometheus scrapes the API | pass |
+| monitoring | Grafana datasources (Prometheus, ClickHouse) are healthy | pass |
+| bi | Superset is up with the FraudLens dashboard | pass |
+
+OLAP benchmark (sample data, median of five runs on the runner):
+
+| Question | Trino (ms) | ClickHouse (ms) | ClickHouse faster | Same answer |
+|---|---|---|---|---|
+| Daily caught, false and missed alerts | 293 | 14.8 | 20× | yes |
+| Fraud and alerts by category and hour | 226 | 16.3 | 14× | yes |
+| Merchants with the most missed fraud | 212 | 10.6 | 20× | yes |
+| Alert precision by state | 232 | 9.9 | 23× | yes |
+
+Governance: OpenMetadata 1.13.4 catalogued 13 tables and views from Trino, tagged
+29 PII columns and recorded 9 lineage edges from the raw files to
+`gold.scored_transactions`.
+
+### Fixes the runner found
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `minio-init` exited with an error | minio-py 7.2.20's `MinioAdmin` takes keyword arguments only | `MinioAdmin(endpoint=..., credentials=...)` |
+| MLflow never became healthy | four server workers in a 1 GB container kept dying | `--workers 1`, 1.5 GB limit |
+| partitioned tables missing from the catalog | Trino's file-based access control denied `system.sync_partition_metadata` | `procedures` rule for the pipeline user |
+| crawler stopped at the first failing table | one exception ended registration | each table registered independently; failures reported and fail CI |
 
 ## 7. Stop and clean up
 

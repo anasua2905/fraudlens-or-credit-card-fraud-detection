@@ -91,6 +91,7 @@ Turn on:
 
 ## 6. Current state
 
-The plan file mirrors the actual project: stages 1-8 are complete (closed issues), and the open items are the
-CI workflow installation, the hosted dashboard, the final report/presentation, and merging `final-a4` into
-`main`. Re-run the setup script after editing `project_plan.yaml` to keep the board in sync.
+The plan file mirrors the actual project: stages 1-8 are complete, the CI workflows are installed and green
+(including the Docker platform end to end and the OpenMetadata governance job), and `final-a4` was merged into
+`main` through pull request #1. The open item is a permanently hosted dashboard. Re-run the setup script after
+editing `project_plan.yaml` to keep the board in sync.

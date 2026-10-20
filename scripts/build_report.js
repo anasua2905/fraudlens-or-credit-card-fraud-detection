@@ -27,6 +27,9 @@ const VER = J("verification_report.json"), EXP = J("explanations.json"), META = 
 const MON = J("monitoring/summary.json"), MAN = J("acquisition_manifest.json");
 const FAIR = JO("fairness.json"), CHAL = JO("monitoring/challenger.json");
 const OLAP = JO("olap_benchmark.json"), GOV = JO("governance_catalog.json"), SMOKE = JO("platform_smoke.json");
+const PCI = JO("platform_ci.json");        // the platform workflow's results (scripts/ci/collect_platform_results.py)
+const OLAP_Q = { daily_outcomes: "Daily caught, false and missed alerts", category_by_hour: "Fraud and alerts by category and hour",
+  missed_by_merchant: "Merchants with the most missed fraud", alert_precision_by_state: "Alert precision by state" };
 
 const CH = MOD.champion, SEL = MOD.selection, CR = MOD.results[CH], CT = CR.test, CVd = CR.validation;
 const THR = CR.thresholds_from_validation[MOD.threshold_strategy];
@@ -297,13 +300,24 @@ if (OLAP && OLAP.status !== "skipped") {
   add(table(["Question", "Rows", "Trino (ms)", "ClickHouse (ms)", "Answers agree"], Object.entries(OLAP.queries).map(([k, q]) =>
     [q.question, String(q.rows), q.trino_ms ? String(q.trino_ms.median) : "n/a", String(q.clickhouse_ms.median), q.answers_agree ? "Yes" : "n/a"]), [7, 1, 2, 2, 2]));
 }
-add(H2("8.4 Deployment"));
+if (!(OLAP && OLAP.status !== "skipped") && PCI && PCI.olap) {
+  add(TCAP(`Same questions, two engines (median of five runs; platform workflow run ${PCI.run_id}, sample data on a GitHub runner).`));
+  add(table(["Question", "Trino (ms)", "ClickHouse (ms)", "Answers agree"], Object.entries(PCI.olap).map(([k, v]) =>
+    [OLAP_Q[k] || k, String(v[1]), String(v[0]), v[2] ? "Yes" : "No"]), [7, 2, 2, 2]));
+}
+if (PCI && PCI.smoke) {
+  add(H2("8.4 The platform, verified end to end"));
+  add(P(`The platform workflow starts every service on a GitHub runner, runs the whole lifecycle on synthetic sample data through NiFi, the lake, the crawler, Trino and ClickHouse, then checks each component. Run ${PCI.run_id} (commit ${PCI.commit}) passed ${PCI.smoke.passed} of ${PCI.smoke.total} smoke checks${PCI.governance ? `; its governance job catalogued ${PCI.governance.tables.length} tables and views in OpenMetadata ${PCI.governance.version}, tagged ${PCI.governance.pii_columns} PII columns and recorded ${PCI.governance.lineage_edges} lineage edges from raw to gold` : ""}.`));
+  add(TCAP("Platform smoke checks (platform workflow)."));
+  add(table(["Component", "Check", "Result"], PCI.smoke.checks.map(([g, c, r]) => [g, c, r === "PASS" ? "Pass" : "Fail"]), [2, 9, 2]));
+}
+add(H2(PCI && PCI.smoke ? "8.5 Deployment" : "8.4 Deployment"));
 add(TCAP("Deployment targets."));
 const dRows = [
   ["Local (Windows, no Docker)", "scripts/deploy/run_local.ps1 starts the API and the dashboard; -Public adds Cloudflare quick-tunnel links", DEPLOY.tunnel_dashboard_url ? "Deployed during the project" : "Script"],
   ["Container image", "platform/docker/Dockerfile.app; built, smoke-tested and published to GHCR by the deploy workflow", "ghcr.io/anasua2905/fraudlens-app"],
   ["Hosted dashboard", "Streamlit Community Cloud from the repository (dashboard/app.py, runs from the bundle)", DEPLOY.streamlit_url || "Documented in docs/deployment.md"],
-  ["Full platform", "docker compose profiles lake, ingest, olap, bi, mlops (+ OpenMetadata)", "platform/"],
+  ["Full platform", "docker compose profiles lake, ingest, olap, bi, mlops (+ OpenMetadata)", PCI && PCI.conclusion === "success" ? "platform/; verified end to end by the platform workflow" : "platform/"],
 ];
 add(table(["Target", "How", "Where"], dRows, [3, 8, 4]));
 
@@ -326,7 +340,7 @@ add(PAGEBREAK(), H1("10. Project Management, Quality and Reproducibility"));
 add(H2("10.1 GitHub Project"));
 add(P("Work is tracked on a GitHub Project board generated from scripts/github/project_plan.yaml by scripts/github/setup_project.py: four milestones (data foundation, analysis and modelling, deployment and monitoring, final submission), one issue per task with an acceptance checklist, labels for lifecycle stage and type, and a Lifecycle stage field on the board so progress can be followed stage by stage. Issue and pull-request templates and built-in workflows (auto-add, closed → Done) keep it in sync with the repository; docs/github_project.md is the team's guide."));
 add(H2("10.2 CI/CD"));
-add(P(`Three GitHub Actions workflows: ci (unit and end-to-end tests of the whole lifecycle on synthetic sample data, plus a headless render of the dashboard from the committed bundle), platform (the complete Docker platform on a runner: NiFi ingest, MinIO, Hive Metastore, Trino governance, ClickHouse, MLflow, API, Prometheus, Grafana, Superset, and a second job for OpenMetadata, checked by a smoke test of every component), and deploy (build, smoke-test and publish the application image).${SMOKE ? ` In the latest platform run ${SMOKE.passed} of ${SMOKE.passed + SMOKE.failed} smoke checks passed.` : ""}`));
+add(P(`Three GitHub Actions workflows: ci (unit and end-to-end tests of the whole lifecycle on synthetic sample data, plus a headless render of the dashboard from the committed bundle), platform (the complete Docker platform on a runner: NiFi ingest, MinIO, Hive Metastore, Trino governance, ClickHouse, MLflow, API, Prometheus, Grafana, Superset, and a second job for OpenMetadata, checked by a smoke test of every component), and deploy (build, smoke-test and publish the application image).${SMOKE ? ` In the latest platform run ${SMOKE.passed} of ${SMOKE.passed + SMOKE.failed} smoke checks passed.` : PCI && PCI.smoke ? ` In platform run ${PCI.run_id} ${PCI.smoke.passed} of ${PCI.smoke.total} smoke checks passed and the governance job ${PCI.jobs && Object.entries(PCI.jobs).some(([k, v]) => k.startsWith("governance") && v === "success") ? "succeeded" : "ran"}.` : ""}`));
 add(H2("10.3 End-to-end verification"));
 const byStage = {}; VER.checks.forEach((c) => { byStage[c.stage] = byStage[c.stage] || [0, 0]; byStage[c.stage][0] += 1; if (c.status === "PASS") byStage[c.stage][1] += 1; });
 add(TCAP("Verification checks by lifecycle stage (final run)."));
