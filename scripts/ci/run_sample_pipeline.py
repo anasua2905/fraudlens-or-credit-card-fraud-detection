@@ -52,6 +52,13 @@ def main() -> None:
     cfg["evaluation"].update(bootstrap=50, permutation_importance_rows=2000, shap_rows=300)
     run_all(cfg, stop=a.stop, source="local", local_dir=str(sample), strict=False)
 
+    # the platform stages report problems instead of raising; on CI they must fail the step
+    import json
+    catalog = json.loads((cfg["paths"]["reports"] / "data_catalog.json").read_text(encoding="utf-8"))
+    if catalog.get("status") != "registered":
+        raise SystemExit(f"crawler status {catalog.get('status')}: "
+                         f"{catalog.get('reason') or json.dumps(catalog.get('failures'))[:1500]}")
+
 
 if __name__ == "__main__":
     ci_annotate.run(main, "sample pipeline")

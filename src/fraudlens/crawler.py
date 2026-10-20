@@ -207,39 +207,54 @@ def _run(cur, sql: str):
         return None
 
 
-def register(cfg: dict, found: list[DiscoveredTable]) -> list[dict]:
+def _register_table(cur, catalog: str, t: DiscoveredTable, fq: str) -> dict:
+    existing = _run(cur, f"SELECT column_name, data_type FROM {catalog}.information_schema.columns "
+                         f"WHERE table_schema = '{t.schema}' AND table_name = '{t.name}' ORDER BY ordinal_position")
+    if existing and [c for c, _ in existing] != [c for c, _ in t.columns]:
+        log.info("Schema of %s changed; re-registering", fq)
+        _run(cur, f"DROP TABLE {fq}")      # external table: files are untouched
+    for stmt in ddl(t, catalog):
+        _run(cur, stmt)
+    if t.partition_keys:
+        _run(cur, f"CALL {catalog}.system.sync_partition_metadata('{t.schema}', '{t.name}', 'FULL')")
+    rows = _run(cur, f"SELECT count(*) FROM {fq}")[0][0]
+    parts = len({tuple(parse_partitions(k)) for k in t.keys}) if t.partition_keys else 0
+    log.info("Registered %s (%s rows)", fq, f"{rows:,}")
+    return {
+        "table": f"{t.schema}.{t.name}", "layer": t.layer, "format": t.fmt,
+        "location": t.location.replace("s3a://", "s3://"), "rows": int(rows), "files": len(t.keys),
+        "partition_keys": t.partition_keys, "partitions": parts,
+        "description": DESCRIPTIONS.get(f"{t.schema}.{t.name}", ""),
+        "columns": [{"name": c, "type": typ, **({"pii": PII_TAGS[c]} if c in PII_TAGS else {})}
+                    for c, typ in t.columns],
+    }
+
+
+def register(cfg: dict, found: list[DiscoveredTable], failures: list[dict] | None = None) -> list[dict]:
     catalog = cfg["platform"].get("trino_catalog", "hive")
     conn = connect(cfg)
     cur = conn.cursor()
     entries = []
+    failures = [] if failures is None else failures
     for layer, bucket in cfg["platform"]["buckets"].items():
         _run(cur, f"CREATE SCHEMA IF NOT EXISTS {catalog}.{LAYER_SCHEMAS[layer]} "
                   f"WITH (location = 's3a://{bucket}/')")
     for t in found:
         fq = f"{catalog}.{t.schema}.{t.name}"
-        existing = _run(cur, f"SELECT column_name, data_type FROM {catalog}.information_schema.columns "
-                             f"WHERE table_schema = '{t.schema}' AND table_name = '{t.name}' ORDER BY ordinal_position")
-        if existing and [c for c, _ in existing] != [c for c, _ in t.columns]:
-            log.info("Schema of %s changed; re-registering", fq)
-            _run(cur, f"DROP TABLE {fq}")      # external table: files are untouched
-        for stmt in ddl(t, catalog):
-            _run(cur, stmt)
-        if t.partition_keys:
-            _run(cur, f"CALL {catalog}.system.sync_partition_metadata('{t.schema}', '{t.name}', 'FULL')")
-        rows = _run(cur, f"SELECT count(*) FROM {fq}")[0][0]
-        parts = len({tuple(parse_partitions(k)) for k in t.keys}) if t.partition_keys else 0
-        entries.append({
-            "table": f"{t.schema}.{t.name}", "layer": t.layer, "format": t.fmt,
-            "location": t.location.replace("s3a://", "s3://"), "rows": int(rows), "files": len(t.keys),
-            "partition_keys": t.partition_keys, "partitions": parts,
-            "description": DESCRIPTIONS.get(f"{t.schema}.{t.name}", ""),
-            "columns": [{"name": c, "type": typ, **({"pii": PII_TAGS[c]} if c in PII_TAGS else {})}
-                        for c, typ in t.columns],
-        })
-        log.info("Registered %s (%s rows)", fq, f"{rows:,}")
+        try:
+            entries.append(_register_table(cur, catalog, t, fq))
+        except Exception as exc:           # one bad table must not hide the others
+            msg = f"{type(exc).__name__}: {exc}"[:600]
+            failures.append({"table": f"{t.schema}.{t.name}", "error": msg})
+            log.error("Registering %s failed: %s", fq, msg)
     for name, body in VIEWS.items():
         if any(e["table"] == "gold.scored_transactions" for e in entries):
-            _run(cur, f"CREATE OR REPLACE VIEW {catalog}.{name} AS {body.format(c=catalog)}")
+            try:
+                _run(cur, f"CREATE OR REPLACE VIEW {catalog}.{name} AS {body.format(c=catalog)}")
+            except Exception as exc:
+                failures.append({"table": name, "error": f"{type(exc).__name__}: {exc}"[:600]})
+                log.error("Creating view %s failed: %s", name, exc)
+                continue
             entries.append({"table": name, "layer": "gold", "format": "VIEW", "description": "Trino view for BI",
                             "sql": " ".join(body.format(c=catalog).split())})
     return entries
@@ -258,9 +273,12 @@ def run_crawler(cfg: dict, dry_run: bool = False) -> dict:
         report["status"] = "dry_run"
         report["ddl"] = [s for t in found for s in ddl(t, cfg["platform"].get("trino_catalog", "hive"))]
     else:
+        failures: list[dict] = []
         try:
-            report["tables"] = register(cfg, found)
-            report["status"] = "registered"
+            report["tables"] = register(cfg, found, failures)
+            report["status"] = "registered" if not failures else "partial"
+            if failures:
+                report["failures"] = failures
         except Exception as exc:
             report["status"] = "failed"
             report["reason"] = f"{type(exc).__name__}: {exc}"

@@ -12,6 +12,8 @@ import sys
 import traceback
 
 _TAIL: collections.deque[str] = collections.deque(maxlen=30)
+_ERRORS: collections.deque[str] = collections.deque(maxlen=8)        # log lines that report an error
+_MARKS = ("ERROR", "Error:", "failed", "FAIL", "Traceback")
 
 
 class _Tee:
@@ -21,7 +23,11 @@ class _Tee:
     def write(self, text):
         self._buf += text
         *lines, self._buf = self._buf.split("\n")
-        _TAIL.extend(ln for ln in lines if ln.strip())
+        for ln in lines:
+            if ln.strip():
+                _TAIL.append(ln)
+                if any(m in ln for m in _MARKS):
+                    _ERRORS.append(ln[:400])
         return self._stream.write(text)
 
     def __getattr__(self, name):
@@ -30,6 +36,10 @@ class _Tee:
 
 def _escape(text: str) -> str:
     return text.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
+
+
+def _error_lines() -> list[str]:
+    return (["--- errors logged earlier"] + list(_ERRORS) + ["--- last output"]) if _ERRORS else []
 
 
 def install(title: str) -> None:
@@ -41,7 +51,7 @@ def install(title: str) -> None:
     def hook(etype, value, tb):
         previous(etype, value, tb)
         trace = "".join(traceback.format_exception(etype, value, tb)).strip().splitlines()
-        lines = list(_TAIL)[-12:] + ["--- traceback (last lines)"] + trace[-14:]
+        lines = _error_lines() + list(_TAIL)[-8:] + ["--- traceback (last lines)"] + trace[-12:]
         sys.__stdout__.write(f"::error title={title} failed::{_escape(chr(10).join(lines))[:4000]}\n")
         sys.__stdout__.flush()
 
@@ -60,6 +70,6 @@ def run(main, title: str) -> None:
             code = 1
     if code not in (None, 0) and os.environ.get("GITHUB_ACTIONS"):
         sys.__stdout__.write(f"::error title={title} failed (exit {code})::"
-                             f"{_escape(chr(10).join(list(_TAIL)[-25:]))[:4000]}\n")
+                             f"{_escape(chr(10).join(_error_lines() + list(_TAIL)[-20:]))[:4000]}\n")
         sys.__stdout__.flush()
     sys.exit(code or 0)
