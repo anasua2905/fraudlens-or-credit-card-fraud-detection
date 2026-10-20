@@ -28,6 +28,11 @@ import tempfile
 import time
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "ci"))
+import ci_annotate  # noqa: E402
+
+ci_annotate.install("governance")
+
 import requests
 
 ROOT = Path(__file__).resolve().parents[2]

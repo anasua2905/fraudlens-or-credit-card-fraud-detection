@@ -19,6 +19,9 @@ import urllib3
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
+import ci_annotate  # noqa: E402
+
+ci_annotate.install("smoke test")
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from fraudlens import lake  # noqa: E402

@@ -69,7 +69,7 @@ def main() -> int:
     s3.set_bucket_versioning("fraudlens-raw", VersioningConfig(ENABLED))
     print("versioning enabled on fraudlens-raw")
 
-    admin = MinioAdmin(endpoint, credentials=StaticProvider(root_user, root_pw), secure=False)
+    admin = MinioAdmin(endpoint=endpoint, credentials=StaticProvider(root_user, root_pw), secure=False)
     for policy, (key_env, secret_env, policy_file) in ACCOUNTS.items():
         admin.policy_add(policy, str(HERE / "policies" / policy_file))
         access, secret = os.environ.get(key_env), os.environ.get(secret_env)

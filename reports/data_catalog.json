@@ -1,7 +1,0 @@
-{
-  "crawled_at": "2026-10-18T09:49:22",
-  "status": "skipped",
-  "metastore": "Hive Metastore (via Trino hive catalog)",
-  "tables": [],
-  "reason": "MinIO not reachable"
-}

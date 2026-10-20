@@ -21,6 +21,10 @@ sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "scripts"))
 os.environ.setdefault("MLFLOW_DISABLE_AGENT_HINT", "1")
 
+import ci_annotate  # noqa: E402
+
+ci_annotate.install("sample pipeline")
+
 import matplotlib  # noqa: E402
 
 matplotlib.use("Agg")
