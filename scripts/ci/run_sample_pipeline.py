@@ -58,6 +58,12 @@ def main() -> None:
     if catalog.get("status") != "registered":
         raise SystemExit(f"crawler status {catalog.get('status')}: "
                          f"{catalog.get('reason') or json.dumps(catalog.get('failures'))[:1500]}")
+    olap_report = cfg["paths"]["reports"] / "olap_benchmark.json"
+    if a.stop is None and olap_report.exists():
+        olap = json.loads(olap_report.read_text(encoding="utf-8"))
+        if olap.get("status") != "ok":
+            raise SystemExit(f"OLAP benchmark status {olap.get('status')}: "
+                             + json.dumps({k: v.get("answers_agree") for k, v in olap.get("queries", {}).items()}))
 
 
 if __name__ == "__main__":

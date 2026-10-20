@@ -8,6 +8,11 @@
     {"user": "(pipeline|admin)", "owner": true},
     {"user": "(analyst|superset)", "owner": false}
   ],
+  "procedures": [
+    {"user": "(pipeline|admin)", "catalog": "hive", "schema": "system",
+     "procedure": "(sync_partition_metadata|register_partition|unregister_partition|flush_metadata_cache)",
+     "privileges": ["EXECUTE"]}
+  ],
   "tables": [
     {"user": "(pipeline|admin)", "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP"]},
 
