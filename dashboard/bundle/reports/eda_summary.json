@@ -1,0 +1,1348 @@
+{
+  "class_balance": {
+    "train": {
+      "transactions": 1185094,
+      "frauds": 6837,
+      "fraud_rate_pct": 0.577,
+      "legit_per_fraud": 172.3
+    },
+    "val": {
+      "transactions": 111581,
+      "frauds": 669,
+      "fraud_rate_pct": 0.6,
+      "legit_per_fraud": 165.8
+    },
+    "test": {
+      "transactions": 555719,
+      "frauds": 2145,
+      "fraud_rate_pct": 0.386,
+      "legit_per_fraud": 258.1
+    }
+  },
+  "amount_by_class": {
+    "legit": {
+      "mean": 67.67,
+      "p5": 2.44,
+      "p25": 9.62,
+      "p50": 47.28,
+      "p75": 82.55,
+      "p95": 190.02,
+      "p99": 486.41
+    },
+    "fraud": {
+      "mean": 530.14,
+      "p5": 9.1,
+      "p25": 245.23,
+      "p50": 387.41,
+      "p75": 900.86,
+      "p95": 1084.5,
+      "p99": 1179.92
+    }
+  },
+  "category": {
+    "shopping_net": {
+      "transactions": 89100,
+      "frauds": 1562,
+      "fraud_amount": 1561680.99,
+      "fraud_rate_pct": 1.753,
+      "share_of_frauds_pct": 22.846
+    },
+    "misc_net": {
+      "transactions": 57693,
+      "frauds": 821,
+      "fraud_amount": 653596.13,
+      "fraud_rate_pct": 1.423,
+      "share_of_frauds_pct": 12.008
+    },
+    "grocery_pos": {
+      "transactions": 113103,
+      "frauds": 1599,
+      "fraud_amount": 498557.15,
+      "fraud_rate_pct": 1.414,
+      "share_of_frauds_pct": 23.387
+    },
+    "shopping_pos": {
+      "transactions": 106592,
+      "frauds": 768,
+      "fraud_amount": 672805.0,
+      "fraud_rate_pct": 0.721,
+      "share_of_frauds_pct": 11.233
+    },
+    "gas_transport": {
+      "transactions": 120364,
+      "frauds": 562,
+      "fraud_amount": 6893.96,
+      "fraud_rate_pct": 0.467,
+      "share_of_frauds_pct": 8.22
+    },
+    "misc_pos": {
+      "transactions": 72789,
+      "frauds": 224,
+      "fraud_amount": 45574.24,
+      "fraud_rate_pct": 0.308,
+      "share_of_frauds_pct": 3.276
+    },
+    "grocery_net": {
+      "transactions": 41494,
+      "frauds": 125,
+      "fraud_amount": 1516.97,
+      "fraud_rate_pct": 0.301,
+      "share_of_frauds_pct": 1.828
+    },
+    "travel": {
+      "transactions": 37070,
+      "frauds": 108,
+      "fraud_amount": 969.27,
+      "fraud_rate_pct": 0.291,
+      "share_of_frauds_pct": 1.58
+    },
+    "entertainment": {
+      "transactions": 85874,
+      "frauds": 215,
+      "fraud_amount": 108398.93,
+      "fraud_rate_pct": 0.25,
+      "share_of_frauds_pct": 3.145
+    },
+    "personal_care": {
+      "transactions": 82940,
+      "frauds": 198,
+      "fraud_amount": 5189.09,
+      "fraud_rate_pct": 0.239,
+      "share_of_frauds_pct": 2.896
+    },
+    "kids_pets": {
+      "transactions": 103320,
+      "frauds": 219,
+      "fraud_amount": 3981.42,
+      "fraud_rate_pct": 0.212,
+      "share_of_frauds_pct": 3.203
+    },
+    "food_dining": {
+      "transactions": 83714,
+      "frauds": 140,
+      "fraud_amount": 16775.98,
+      "fraud_rate_pct": 0.167,
+      "share_of_frauds_pct": 2.048
+    },
+    "home": {
+      "transactions": 112609,
+      "frauds": 180,
+      "fraud_amount": 46247.41,
+      "fraud_rate_pct": 0.16,
+      "share_of_frauds_pct": 2.633
+    },
+    "health_fitness": {
+      "transactions": 78432,
+      "frauds": 116,
+      "fraud_amount": 2354.25,
+      "fraud_rate_pct": 0.148,
+      "share_of_frauds_pct": 1.697
+    }
+  },
+  "time": {
+    "hour": {
+      "0": {
+        "transactions": 38908,
+        "frauds": 583,
+        "fraud_amount": 200738.71,
+        "fraud_rate_pct": 1.498,
+        "share_of_frauds_pct": 8.527
+      },
+      "1": {
+        "transactions": 39300,
+        "frauds": 603,
+        "fraud_amount": 211959.7,
+        "fraud_rate_pct": 1.534,
+        "share_of_frauds_pct": 8.82
+      },
+      "2": {
+        "transactions": 38905,
+        "frauds": 574,
+        "fraud_amount": 205183.21,
+        "fraud_rate_pct": 1.475,
+        "share_of_frauds_pct": 8.395
+      },
+      "3": {
+        "transactions": 39042,
+        "frauds": 567,
+        "fraud_amount": 194959.99,
+        "fraud_rate_pct": 1.452,
+        "share_of_frauds_pct": 8.293
+      },
+      "4": {
+        "transactions": 38295,
+        "frauds": 42,
+        "fraud_amount": 13472.96,
+        "fraud_rate_pct": 0.11,
+        "share_of_frauds_pct": 0.614
+      },
+      "5": {
+        "transactions": 38508,
+        "frauds": 52,
+        "fraud_amount": 14754.99,
+        "fraud_rate_pct": 0.135,
+        "share_of_frauds_pct": 0.761
+      },
+      "6": {
+        "transactions": 38638,
+        "frauds": 35,
+        "fraud_amount": 10975.41,
+        "fraud_rate_pct": 0.091,
+        "share_of_frauds_pct": 0.512
+      },
+      "7": {
+        "transactions": 38602,
+        "frauds": 48,
+        "fraud_amount": 17648.04,
+        "fraud_rate_pct": 0.124,
+        "share_of_frauds_pct": 0.702
+      },
+      "8": {
+        "transactions": 38769,
+        "frauds": 49,
+        "fraud_amount": 16400.34,
+        "fraud_rate_pct": 0.126,
+        "share_of_frauds_pct": 0.717
+      },
+      "9": {
+        "transactions": 38559,
+        "frauds": 44,
+        "fraud_amount": 12365.62,
+        "fraud_rate_pct": 0.114,
+        "share_of_frauds_pct": 0.644
+      },
+      "10": {
+        "transactions": 38607,
+        "frauds": 34,
+        "fraud_amount": 13916.74,
+        "fraud_rate_pct": 0.088,
+        "share_of_frauds_pct": 0.497
+      },
+      "11": {
+        "transactions": 38503,
+        "frauds": 36,
+        "fraud_amount": 11959.96,
+        "fraud_rate_pct": 0.093,
+        "share_of_frauds_pct": 0.527
+      },
+      "12": {
+        "transactions": 59565,
+        "frauds": 64,
+        "fraud_amount": 41029.57,
+        "fraud_rate_pct": 0.107,
+        "share_of_frauds_pct": 0.936
+      },
+      "13": {
+        "transactions": 59763,
+        "frauds": 70,
+        "fraud_amount": 41974.53,
+        "fraud_rate_pct": 0.117,
+        "share_of_frauds_pct": 1.024
+      },
+      "14": {
+        "transactions": 59284,
+        "frauds": 83,
+        "fraud_amount": 58295.85,
+        "fraud_rate_pct": 0.14,
+        "share_of_frauds_pct": 1.214
+      },
+      "15": {
+        "transactions": 59751,
+        "frauds": 73,
+        "fraud_amount": 44579.6,
+        "fraud_rate_pct": 0.122,
+        "share_of_frauds_pct": 1.068
+      },
+      "16": {
+        "transactions": 60029,
+        "frauds": 69,
+        "fraud_amount": 43050.23,
+        "fraud_rate_pct": 0.115,
+        "share_of_frauds_pct": 1.009
+      },
+      "17": {
+        "transactions": 59811,
+        "frauds": 71,
+        "fraud_amount": 45096.6,
+        "fraud_rate_pct": 0.119,
+        "share_of_frauds_pct": 1.038
+      },
+      "18": {
+        "transactions": 60352,
+        "frauds": 69,
+        "fraud_amount": 43026.95,
+        "fraud_rate_pct": 0.114,
+        "share_of_frauds_pct": 1.009
+      },
+      "19": {
+        "transactions": 59993,
+        "frauds": 73,
+        "fraud_amount": 47030.18,
+        "fraud_rate_pct": 0.122,
+        "share_of_frauds_pct": 1.068
+      },
+      "20": {
+        "transactions": 59537,
+        "frauds": 59,
+        "fraud_amount": 43601.03,
+        "fraud_rate_pct": 0.099,
+        "share_of_frauds_pct": 0.863
+      },
+      "21": {
+        "transactions": 59865,
+        "frauds": 65,
+        "fraud_amount": 44043.76,
+        "fraud_rate_pct": 0.109,
+        "share_of_frauds_pct": 0.951
+      },
+      "22": {
+        "transactions": 61201,
+        "frauds": 1743,
+        "fraud_amount": 1148374.03,
+        "fraud_rate_pct": 2.848,
+        "share_of_frauds_pct": 25.494
+      },
+      "23": {
+        "transactions": 61307,
+        "frauds": 1731,
+        "fraud_amount": 1100102.79,
+        "fraud_rate_pct": 2.823,
+        "share_of_frauds_pct": 25.318
+      }
+    },
+    "day_of_week": {
+      "Mon": {
+        "transactions": 231671,
+        "frauds": 1053,
+        "fraud_amount": 540160.79,
+        "fraud_rate_pct": 0.455,
+        "share_of_frauds_pct": 15.401
+      },
+      "Tue": {
+        "transactions": 138635,
+        "frauds": 853,
+        "fraud_amount": 456464.25,
+        "fraud_rate_pct": 0.615,
+        "share_of_frauds_pct": 12.476
+      },
+      "Wed": {
+        "transactions": 120790,
+        "frauds": 765,
+        "fraud_amount": 397640.2,
+        "fraud_rate_pct": 0.633,
+        "share_of_frauds_pct": 11.189
+      },
+      "Thu": {
+        "transactions": 135558,
+        "frauds": 899,
+        "fraud_amount": 489379.5,
+        "fraud_rate_pct": 0.663,
+        "share_of_frauds_pct": 13.149
+      },
+      "Fri": {
+        "transactions": 139065,
+        "frauds": 1010,
+        "fraud_amount": 541800.91,
+        "fraud_rate_pct": 0.726,
+        "share_of_frauds_pct": 14.773
+      },
+      "Sat": {
+        "transactions": 187861,
+        "frauds": 1152,
+        "fraud_amount": 599010.7,
+        "fraud_rate_pct": 0.613,
+        "share_of_frauds_pct": 16.849
+      },
+      "Sun": {
+        "transactions": 231514,
+        "frauds": 1105,
+        "fraud_amount": 600084.44,
+        "fraud_rate_pct": 0.477,
+        "share_of_frauds_pct": 16.162
+      }
+    },
+    "month": {
+      "2019-01": {
+        "transactions": 52525,
+        "frauds": 506,
+        "fraud_amount": 261780.38,
+        "fraud_rate_pct": 0.963,
+        "share_of_frauds_pct": 7.401
+      },
+      "2019-02": {
+        "transactions": 49866,
+        "frauds": 517,
+        "fraud_amount": 274051.08,
+        "fraud_rate_pct": 1.037,
+        "share_of_frauds_pct": 7.562
+      },
+      "2019-03": {
+        "transactions": 70939,
+        "frauds": 494,
+        "fraud_amount": 237637.59,
+        "fraud_rate_pct": 0.696,
+        "share_of_frauds_pct": 7.225
+      },
+      "2019-04": {
+        "transactions": 68078,
+        "frauds": 376,
+        "fraud_amount": 202067.29,
+        "fraud_rate_pct": 0.552,
+        "share_of_frauds_pct": 5.499
+      },
+      "2019-05": {
+        "transactions": 72532,
+        "frauds": 408,
+        "fraud_amount": 210549.11,
+        "fraud_rate_pct": 0.563,
+        "share_of_frauds_pct": 5.968
+      },
+      "2019-06": {
+        "transactions": 86064,
+        "frauds": 354,
+        "fraud_amount": 178204.6,
+        "fraud_rate_pct": 0.411,
+        "share_of_frauds_pct": 5.178
+      },
+      "2019-07": {
+        "transactions": 86596,
+        "frauds": 331,
+        "fraud_amount": 188701.59,
+        "fraud_rate_pct": 0.382,
+        "share_of_frauds_pct": 4.841
+      },
+      "2019-08": {
+        "transactions": 87359,
+        "frauds": 382,
+        "fraud_amount": 203951.13,
+        "fraud_rate_pct": 0.437,
+        "share_of_frauds_pct": 5.587
+      },
+      "2019-09": {
+        "transactions": 70652,
+        "frauds": 418,
+        "fraud_amount": 217675.37,
+        "fraud_rate_pct": 0.592,
+        "share_of_frauds_pct": 6.114
+      },
+      "2019-10": {
+        "transactions": 68758,
+        "frauds": 454,
+        "fraud_amount": 257739.72,
+        "fraud_rate_pct": 0.66,
+        "share_of_frauds_pct": 6.64
+      },
+      "2019-11": {
+        "transactions": 70421,
+        "frauds": 388,
+        "fraud_amount": 200307.47,
+        "fraud_rate_pct": 0.551,
+        "share_of_frauds_pct": 5.675
+      },
+      "2019-12": {
+        "transactions": 141060,
+        "frauds": 592,
+        "fraud_amount": 335157.54,
+        "fraud_rate_pct": 0.42,
+        "share_of_frauds_pct": 8.659
+      },
+      "2020-01": {
+        "transactions": 52202,
+        "frauds": 343,
+        "fraud_amount": 182595.36,
+        "fraud_rate_pct": 0.657,
+        "share_of_frauds_pct": 5.017
+      },
+      "2020-02": {
+        "transactions": 47791,
+        "frauds": 336,
+        "fraud_amount": 183950.11,
+        "fraud_rate_pct": 0.703,
+        "share_of_frauds_pct": 4.914
+      },
+      "2020-03": {
+        "transactions": 72850,
+        "frauds": 444,
+        "fraud_amount": 234090.1,
+        "fraud_rate_pct": 0.609,
+        "share_of_frauds_pct": 6.494
+      },
+      "2020-04": {
+        "transactions": 66892,
+        "frauds": 302,
+        "fraud_amount": 152173.98,
+        "fraud_rate_pct": 0.451,
+        "share_of_frauds_pct": 4.417
+      },
+      "2020-05": {
+        "transactions": 20509,
+        "frauds": 192,
+        "fraud_amount": 103908.37,
+        "fraud_rate_pct": 0.936,
+        "share_of_frauds_pct": 2.808
+      }
+    }
+  },
+  "demographics": {
+    "age_band": {
+      "<25": {
+        "transactions": 110815,
+        "frauds": 727,
+        "fraud_amount": 422434.67,
+        "fraud_rate_pct": 0.656,
+        "share_of_frauds_pct": 10.633
+      },
+      "25-34": {
+        "transactions": 263111,
+        "frauds": 1245,
+        "fraud_amount": 612871.75,
+        "fraud_rate_pct": 0.473,
+        "share_of_frauds_pct": 18.21
+      },
+      "35-44": {
+        "transactions": 249411,
+        "frauds": 1047,
+        "fraud_amount": 504098.1,
+        "fraud_rate_pct": 0.42,
+        "share_of_frauds_pct": 15.314
+      },
+      "45-54": {
+        "transactions": 234672,
+        "frauds": 1360,
+        "fraud_amount": 702472.28,
+        "fraud_rate_pct": 0.58,
+        "share_of_frauds_pct": 19.892
+      },
+      "55-64": {
+        "transactions": 150285,
+        "frauds": 1144,
+        "fraud_amount": 633912.52,
+        "fraud_rate_pct": 0.761,
+        "share_of_frauds_pct": 16.732
+      },
+      "65-74": {
+        "transactions": 91588,
+        "frauds": 531,
+        "fraud_amount": 318722.18,
+        "fraud_rate_pct": 0.58,
+        "share_of_frauds_pct": 7.767
+      },
+      "75+": {
+        "transactions": 85212,
+        "frauds": 783,
+        "fraud_amount": 430029.29,
+        "fraud_rate_pct": 0.919,
+        "share_of_frauds_pct": 11.452
+      }
+    },
+    "gender": {
+      "F": {
+        "transactions": 648739,
+        "frauds": 3392,
+        "fraud_amount": 1677554.45,
+        "fraud_rate_pct": 0.523,
+        "share_of_frauds_pct": 49.612
+      },
+      "M": {
+        "transactions": 536355,
+        "frauds": 3445,
+        "fraud_amount": 1946986.34,
+        "fraud_rate_pct": 0.642,
+        "share_of_frauds_pct": 50.388
+      }
+    },
+    "state": {
+      "NV": {
+        "transactions": 5127,
+        "frauds": 47,
+        "fraud_amount": 24793.48,
+        "fraud_rate_pct": 0.917,
+        "share_of_frauds_pct": 0.687
+      },
+      "CO": {
+        "transactions": 12659,
+        "frauds": 106,
+        "fraud_amount": 55324.26,
+        "fraud_rate_pct": 0.837,
+        "share_of_frauds_pct": 1.55
+      },
+      "OR": {
+        "transactions": 17018,
+        "frauds": 138,
+        "fraud_amount": 72577.23,
+        "fraud_rate_pct": 0.811,
+        "share_of_frauds_pct": 2.018
+      },
+      "NH": {
+        "transactions": 7543,
+        "frauds": 59,
+        "fraud_amount": 36574.33,
+        "fraud_rate_pct": 0.782,
+        "share_of_frauds_pct": 0.863
+      },
+      "TN": {
+        "transactions": 16014,
+        "frauds": 124,
+        "fraud_amount": 67952.1,
+        "fraud_rate_pct": 0.774,
+        "share_of_frauds_pct": 1.814
+      },
+      "NE": {
+        "transactions": 22093,
+        "frauds": 166,
+        "fraud_amount": 90706.17,
+        "fraud_rate_pct": 0.751,
+        "share_of_frauds_pct": 2.428
+      },
+      "OH": {
+        "transactions": 42421,
+        "frauds": 309,
+        "fraud_amount": 162008.05,
+        "fraud_rate_pct": 0.728,
+        "share_of_frauds_pct": 4.52
+      },
+      "FL": {
+        "transactions": 39079,
+        "frauds": 278,
+        "fraud_amount": 148715.93,
+        "fraud_rate_pct": 0.711,
+        "share_of_frauds_pct": 4.066
+      },
+      "MN": {
+        "transactions": 28955,
+        "frauds": 199,
+        "fraud_amount": 108169.26,
+        "fraud_rate_pct": 0.687,
+        "share_of_frauds_pct": 2.911
+      },
+      "NY": {
+        "transactions": 76262,
+        "frauds": 521,
+        "fraud_amount": 278303.13,
+        "fraud_rate_pct": 0.683,
+        "share_of_frauds_pct": 7.62
+      },
+      "SD": {
+        "transactions": 11234,
+        "frauds": 74,
+        "fraud_amount": 39016.1,
+        "fraud_rate_pct": 0.659,
+        "share_of_frauds_pct": 1.082
+      },
+      "ME": {
+        "transactions": 15109,
+        "frauds": 99,
+        "fraud_amount": 54066.42,
+        "fraud_rate_pct": 0.655,
+        "share_of_frauds_pct": 1.448
+      },
+      "SC": {
+        "transactions": 26661,
+        "frauds": 172,
+        "fraud_amount": 86285.84,
+        "fraud_rate_pct": 0.645,
+        "share_of_frauds_pct": 2.516
+      },
+      "VA": {
+        "transactions": 26696,
+        "frauds": 167,
+        "fraud_amount": 85510.93,
+        "fraud_rate_pct": 0.626,
+        "share_of_frauds_pct": 2.443
+      },
+      "OK": {
+        "transactions": 24332,
+        "frauds": 143,
+        "fraud_amount": 74137.63,
+        "fraud_rate_pct": 0.588,
+        "share_of_frauds_pct": 2.092
+      },
+      "CA": {
+        "transactions": 51546,
+        "frauds": 302,
+        "fraud_amount": 158150.04,
+        "fraud_rate_pct": 0.586,
+        "share_of_frauds_pct": 4.417
+      },
+      "KS": {
+        "transactions": 21043,
+        "frauds": 120,
+        "fraud_amount": 57111.07,
+        "fraud_rate_pct": 0.57,
+        "share_of_frauds_pct": 1.755
+      },
+      "IL": {
+        "transactions": 39573,
+        "frauds": 225,
+        "fraud_amount": 120686.94,
+        "fraud_rate_pct": 0.569,
+        "share_of_frauds_pct": 3.291
+      },
+      "KY": {
+        "transactions": 26055,
+        "frauds": 148,
+        "fraud_amount": 81132.12,
+        "fraud_rate_pct": 0.568,
+        "share_of_frauds_pct": 2.165
+      },
+      "PA": {
+        "transactions": 73110,
+        "frauds": 409,
+        "fraud_amount": 221463.07,
+        "fraud_rate_pct": 0.559,
+        "share_of_frauds_pct": 5.982
+      },
+      "MI": {
+        "transactions": 42118,
+        "frauds": 232,
+        "fraud_amount": 120685.02,
+        "fraud_rate_pct": 0.551,
+        "share_of_frauds_pct": 3.393
+      },
+      "GA": {
+        "transactions": 23793,
+        "frauds": 131,
+        "fraud_amount": 72356.99,
+        "fraud_rate_pct": 0.551,
+        "share_of_frauds_pct": 1.916
+      },
+      "NM": {
+        "transactions": 14986,
+        "frauds": 82,
+        "fraud_amount": 46729.23,
+        "fraud_rate_pct": 0.547,
+        "share_of_frauds_pct": 1.199
+      },
+      "MO": {
+        "transactions": 35099,
+        "frauds": 191,
+        "fraud_amount": 93092.1,
+        "fraud_rate_pct": 0.544,
+        "share_of_frauds_pct": 2.794
+      },
+      "WY": {
+        "transactions": 17656,
+        "frauds": 95,
+        "fraud_amount": 47295.45,
+        "fraud_rate_pct": 0.538,
+        "share_of_frauds_pct": 1.389
+      },
+      "AR": {
+        "transactions": 28386,
+        "frauds": 152,
+        "fraud_amount": 74681.21,
+        "fraud_rate_pct": 0.535,
+        "share_of_frauds_pct": 2.223
+      },
+      "WI": {
+        "transactions": 26855,
+        "frauds": 143,
+        "fraud_amount": 75307.44,
+        "fraud_rate_pct": 0.532,
+        "share_of_frauds_pct": 2.092
+      },
+      "AL": {
+        "transactions": 37483,
+        "frauds": 198,
+        "fraud_amount": 101845.75,
+        "fraud_rate_pct": 0.528,
+        "share_of_frauds_pct": 2.896
+      },
+      "MS": {
+        "transactions": 19289,
+        "frauds": 100,
+        "fraud_amount": 53330.78,
+        "fraud_rate_pct": 0.518,
+        "share_of_frauds_pct": 1.463
+      },
+      "MA": {
+        "transactions": 11289,
+        "frauds": 58,
+        "fraud_amount": 36808.6,
+        "fraud_rate_pct": 0.514,
+        "share_of_frauds_pct": 0.848
+      },
+      "WA": {
+        "transactions": 17296,
+        "frauds": 88,
+        "fraud_amount": 41739.05,
+        "fraud_rate_pct": 0.509,
+        "share_of_frauds_pct": 1.287
+      },
+      "IA": {
+        "transactions": 24632,
+        "frauds": 125,
+        "fraud_amount": 62893.08,
+        "fraud_rate_pct": 0.507,
+        "share_of_frauds_pct": 1.828
+      },
+      "NC": {
+        "transactions": 27830,
+        "frauds": 141,
+        "fraud_amount": 67837.07,
+        "fraud_rate_pct": 0.507,
+        "share_of_frauds_pct": 2.062
+      },
+      "WV": {
+        "transactions": 23432,
+        "frauds": 118,
+        "fraud_amount": 61235.75,
+        "fraud_rate_pct": 0.504,
+        "share_of_frauds_pct": 1.726
+      },
+      "MD": {
+        "transactions": 23891,
+        "frauds": 120,
+        "fraud_amount": 57436.96,
+        "fraud_rate_pct": 0.502,
+        "share_of_frauds_pct": 1.755
+      },
+      "TX": {
+        "transactions": 86788,
+        "frauds": 435,
+        "fraud_amount": 241611.45,
+        "fraud_rate_pct": 0.501,
+        "share_of_frauds_pct": 6.362
+      },
+      "IN": {
+        "transactions": 25211,
+        "frauds": 125,
+        "fraud_amount": 79169.6,
+        "fraud_rate_pct": 0.496,
+        "share_of_frauds_pct": 1.828
+      },
+      "UT": {
+        "transactions": 9808,
+        "frauds": 47,
+        "fraud_amount": 19982.43,
+        "fraud_rate_pct": 0.479,
+        "share_of_frauds_pct": 0.687
+      },
+      "VT": {
+        "transactions": 10737,
+        "frauds": 48,
+        "fraud_amount": 27556.15,
+        "fraud_rate_pct": 0.447,
+        "share_of_frauds_pct": 0.702
+      },
+      "NJ": {
+        "transactions": 22466,
+        "frauds": 95,
+        "fraud_amount": 51300.15,
+        "fraud_rate_pct": 0.423,
+        "share_of_frauds_pct": 1.389
+      },
+      "ND": {
+        "transactions": 13583,
+        "frauds": 57,
+        "fraud_amount": 33997.17,
+        "fraud_rate_pct": 0.42,
+        "share_of_frauds_pct": 0.834
+      },
+      "LA": {
+        "transactions": 19144,
+        "frauds": 75,
+        "fraud_amount": 38983.14,
+        "fraud_rate_pct": 0.392,
+        "share_of_frauds_pct": 1.097
+      },
+      "AZ": {
+        "transactions": 9854,
+        "frauds": 37,
+        "fraud_amount": 18333.62,
+        "fraud_rate_pct": 0.375,
+        "share_of_frauds_pct": 0.541
+      },
+      "MT": {
+        "transactions": 10747,
+        "frauds": 32,
+        "fraud_amount": 16776.24,
+        "fraud_rate_pct": 0.298,
+        "share_of_frauds_pct": 0.468
+      },
+      "CT": {
+        "transactions": 7053,
+        "frauds": 16,
+        "fraud_amount": 10788.4,
+        "fraud_rate_pct": 0.227,
+        "share_of_frauds_pct": 0.234
+      },
+      "ID": {
+        "transactions": 5075,
+        "frauds": 11,
+        "fraud_amount": 6893.94,
+        "fraud_rate_pct": 0.217,
+        "share_of_frauds_pct": 0.161
+      }
+    }
+  },
+  "behaviour": {
+    "txn_count_24h": {
+      "0": {
+        "transactions": 101164,
+        "frauds": 277,
+        "fraud_amount": 119357.66,
+        "fraud_rate_pct": 0.274,
+        "share_of_frauds_pct": 4.051
+      },
+      "1": {
+        "transactions": 171183,
+        "frauds": 601,
+        "fraud_amount": 312242.25,
+        "fraud_rate_pct": 0.351,
+        "share_of_frauds_pct": 8.79
+      },
+      "2": {
+        "transactions": 190148,
+        "frauds": 881,
+        "fraud_amount": 467995.86,
+        "fraud_rate_pct": 0.463,
+        "share_of_frauds_pct": 12.886
+      },
+      "3-4": {
+        "transactions": 324082,
+        "frauds": 2179,
+        "fraud_amount": 1162573.03,
+        "fraud_rate_pct": 0.672,
+        "share_of_frauds_pct": 31.871
+      },
+      "5-9": {
+        "transactions": 333393,
+        "frauds": 2735,
+        "fraud_amount": 1491516.79,
+        "fraud_rate_pct": 0.82,
+        "share_of_frauds_pct": 40.003
+      },
+      "10+": {
+        "transactions": 65124,
+        "frauds": 164,
+        "fraud_amount": 70855.2,
+        "fraud_rate_pct": 0.252,
+        "share_of_frauds_pct": 2.399
+      }
+    },
+    "amount_vs_card_mean": {
+      "<0.5x": {
+        "transactions": 497936,
+        "frauds": 1446,
+        "fraud_amount": 30124.19,
+        "fraud_rate_pct": 0.29,
+        "share_of_frauds_pct": 21.368
+      },
+      "0.5-1x": {
+        "transactions": 298538,
+        "frauds": 189,
+        "fraud_amount": 44729.43,
+        "fraud_rate_pct": 0.063,
+        "share_of_frauds_pct": 2.793
+      },
+      "1-2x": {
+        "transactions": 262883,
+        "frauds": 376,
+        "fraud_amount": 223143.57,
+        "fraud_rate_pct": 0.143,
+        "share_of_frauds_pct": 5.556
+      },
+      "2-5x": {
+        "transactions": 102253,
+        "frauds": 1265,
+        "fraud_amount": 494647.68,
+        "fraud_rate_pct": 1.237,
+        "share_of_frauds_pct": 18.694
+      },
+      "5-10x": {
+        "transactions": 14480,
+        "frauds": 1279,
+        "fraud_amount": 757258.51,
+        "fraud_rate_pct": 8.833,
+        "share_of_frauds_pct": 18.901
+      },
+      "10x+": {
+        "transactions": 8026,
+        "frauds": 2212,
+        "fraud_amount": 2049453.43,
+        "fraud_rate_pct": 27.56,
+        "share_of_frauds_pct": 32.688
+      }
+    },
+    "night": {
+      "day": {
+        "transactions": 906431,
+        "frauds": 1036,
+        "fraud_amount": 563222.36,
+        "fraud_rate_pct": 0.114,
+        "share_of_frauds_pct": 15.153
+      },
+      "night (22-04)": {
+        "transactions": 278663,
+        "frauds": 5801,
+        "fraud_amount": 3061318.43,
+        "fraud_rate_pct": 2.082,
+        "share_of_frauds_pct": 84.847
+      }
+    },
+    "new_merchant": {
+      "new": {
+        "transactions": 464723,
+        "frauds": 3720,
+        "fraud_amount": 2022632.57,
+        "fraud_rate_pct": 0.8,
+        "share_of_frauds_pct": 54.41
+      },
+      "seen before": {
+        "transactions": 720371,
+        "frauds": 3117,
+        "fraud_amount": 1601908.22,
+        "fraud_rate_pct": 0.433,
+        "share_of_frauds_pct": 45.59
+      }
+    },
+    "distance_km_by_class": {
+      "0": {
+        "count": 1178257.0,
+        "mean": 76.1,
+        "std": 29.1,
+        "min": 0.0,
+        "25%": 55.3,
+        "50%": 78.2,
+        "75%": 98.5,
+        "max": 152.1
+      },
+      "1": {
+        "count": 6837.0,
+        "mean": 76.2,
+        "std": 28.7,
+        "min": 0.7,
+        "25%": 55.6,
+        "50%": 77.9,
+        "75%": 98.4,
+        "max": 144.5
+      }
+    }
+  },
+  "card_level": {
+    "cards_total": 978,
+    "cards_with_fraud": 694,
+    "frauds_per_fraud_card_median": 10.0,
+    "frauds_per_fraud_card_max": 19,
+    "fraud_span_hours_median": 45.2,
+    "fraud_span_hours_p90": 47.2,
+    "fraud_amount_per_card_median": 5146.62
+  },
+  "feature_signal": {
+    "amt_sum_24h": {
+      "auc": 0.8597,
+      "direction": "higher=riskier",
+      "mean_legit": 264.8215,
+      "mean_fraud": 1921.9116
+    },
+    "log_amount": {
+      "auc": 0.8356,
+      "direction": "higher=riskier",
+      "mean_legit": 3.5221,
+      "mean_fraud": 5.5654
+    },
+    "amount": {
+      "auc": 0.8356,
+      "direction": "higher=riskier",
+      "mean_legit": 67.6694,
+      "mean_fraud": 530.1361
+    },
+    "amt_to_card_mean": {
+      "auc": 0.812,
+      "direction": "higher=riskier",
+      "mean_legit": 0.9884,
+      "mean_fraud": 6.9364
+    },
+    "is_night": {
+      "auc": 0.81,
+      "direction": "higher=riskier",
+      "mean_legit": 0.2316,
+      "mean_fraud": 0.8485
+    },
+    "amt_zscore_card": {
+      "auc": 0.8023,
+      "direction": "higher=riskier",
+      "mean_legit": 0.0107,
+      "mean_fraud": 4.0889
+    },
+    "amt_sum_7d": {
+      "auc": 0.7368,
+      "direction": "higher=riskier",
+      "mean_legit": 1740.3927,
+      "mean_fraud": 3328.6186
+    },
+    "amt_sum_1h": {
+      "auc": 0.6691,
+      "direction": "higher=riskier",
+      "mean_legit": 12.17,
+      "mean_fraud": 412.6695
+    },
+    "secs_since_last_txn": {
+      "auc": 0.6558,
+      "direction": "lower=riskier",
+      "mean_legit": 32820.0696,
+      "mean_fraud": 21349.0464
+    },
+    "txn_count_1h": {
+      "auc": 0.6516,
+      "direction": "higher=riskier",
+      "mean_legit": 0.1861,
+      "mean_fraud": 0.6763
+    },
+    "card_prior_txn_count": {
+      "auc": 0.6474,
+      "direction": "lower=riskier",
+      "mean_legit": 832.2353,
+      "mean_fraud": 546.3953
+    },
+    "card_prior_category_count": {
+      "auc": 0.6426,
+      "direction": "lower=riskier",
+      "mean_legit": 67.8372,
+      "mean_fraud": 43.5339
+    },
+    "txn_count_7d": {
+      "auc": 0.6405,
+      "direction": "lower=riskier",
+      "mean_legit": 25.0638,
+      "mean_fraud": 18.3385
+    },
+    "hour": {
+      "auc": 0.5866,
+      "direction": "higher=riskier",
+      "mean_legit": 12.7977,
+      "mean_fraud": 13.9724
+    },
+    "is_new_merchant_for_card": {
+      "auc": 0.5773,
+      "direction": "higher=riskier",
+      "mean_legit": 0.3913,
+      "mean_fraud": 0.5441
+    },
+    "txn_count_24h": {
+      "auc": 0.5667,
+      "direction": "higher=riskier",
+      "mean_legit": 3.8698,
+      "mean_fraud": 4.232
+    },
+    "age": {
+      "auc": 0.5525,
+      "direction": "higher=riskier",
+      "mean_legit": 45.9315,
+      "mean_fraud": 48.665
+    },
+    "log_city_pop": {
+      "auc": 0.5185,
+      "direction": "higher=riskier",
+      "mean_legit": 8.3632,
+      "mean_fraud": 8.4591
+    },
+    "day_of_week": {
+      "auc": 0.5103,
+      "direction": "higher=riskier",
+      "mean_legit": 3.0978,
+      "mean_fraud": 3.1461
+    },
+    "is_weekend": {
+      "auc": 0.5079,
+      "direction": "lower=riskier",
+      "mean_legit": 0.354,
+      "mean_fraud": 0.3301
+    },
+    "distance_km": {
+      "auc": 0.5024,
+      "direction": "higher=riskier",
+      "mean_legit": 76.1104,
+      "mean_fraud": 76.2333
+    }
+  },
+  "high_correlation_pairs": [
+    {
+      "level_0": "amount",
+      "level_1": "log_amount",
+      "spearman_rho": 1.0
+    },
+    {
+      "level_0": "txn_count_1h",
+      "level_1": "amt_sum_1h",
+      "spearman_rho": 0.994
+    },
+    {
+      "level_0": "log_amount",
+      "level_1": "amt_to_card_mean",
+      "spearman_rho": 0.972
+    },
+    {
+      "level_0": "amount",
+      "level_1": "amt_to_card_mean",
+      "spearman_rho": 0.972
+    },
+    {
+      "level_0": "amt_to_card_mean",
+      "level_1": "amt_zscore_card",
+      "spearman_rho": 0.922
+    },
+    {
+      "level_0": "card_prior_txn_count",
+      "level_1": "card_prior_category_count",
+      "spearman_rho": 0.919
+    },
+    {
+      "level_0": "amount",
+      "level_1": "amt_zscore_card",
+      "spearman_rho": 0.884
+    },
+    {
+      "level_0": "log_amount",
+      "level_1": "amt_zscore_card",
+      "spearman_rho": 0.884
+    }
+  ],
+  "drift_psi": {
+    "card_prior_txn_count": {
+      "val": 5.3707,
+      "test": 4.5001,
+      "flag_val": "major",
+      "flag_test": "major"
+    },
+    "card_prior_category_count": {
+      "val": 1.4909,
+      "test": 2.1729,
+      "flag_val": "major",
+      "flag_test": "major"
+    },
+    "is_new_merchant_for_card": {
+      "val": 0.3888,
+      "test": 0.5642,
+      "flag_val": "major",
+      "flag_test": "major"
+    },
+    "day_of_week": {
+      "val": 0.0562,
+      "test": 0.065,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "amt_zscore_card": {
+      "val": 0.0385,
+      "test": 0.0526,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "txn_count_7d": {
+      "val": 0.0306,
+      "test": 0.0946,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "category_share_card": {
+      "val": 0.0199,
+      "test": 0.0246,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "is_weekend": {
+      "val": 0.0198,
+      "test": 0.0256,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "amt_sum_7d": {
+      "val": 0.0149,
+      "test": 0.0569,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "txn_count_24h": {
+      "val": 0.0096,
+      "test": 0.0503,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "amt_sum_24h": {
+      "val": 0.0066,
+      "test": 0.0316,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "age": {
+      "val": 0.005,
+      "test": 0.0082,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "secs_since_last_txn": {
+      "val": 0.0045,
+      "test": 0.0178,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "amt_to_card_mean": {
+      "val": 0.0007,
+      "test": 0.0005,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "txn_count_1h": {
+      "val": 0.0003,
+      "test": 0.0054,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "amt_sum_1h": {
+      "val": 0.0002,
+      "test": 0.0029,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "amount": {
+      "val": 0.0001,
+      "test": 0.0001,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "log_amount": {
+      "val": 0.0001,
+      "test": 0.0001,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "log_city_pop": {
+      "val": 0.0001,
+      "test": 0.0001,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "distance_km": {
+      "val": 0.0001,
+      "test": 0.0,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "is_night": {
+      "val": 0.0,
+      "test": 0.0,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    },
+    "hour": {
+      "val": 0.0,
+      "test": 0.0,
+      "flag_val": "stable",
+      "flag_test": "stable"
+    }
+  },
+  "new_cards": {
+    "val": {
+      "cards": 914,
+      "cards_not_in_train": 5,
+      "transactions_on_new_cards": 50
+    },
+    "test": {
+      "cards": 924,
+      "cards_not_in_train": 16,
+      "transactions_on_new_cards": 163
+    }
+  }
+}

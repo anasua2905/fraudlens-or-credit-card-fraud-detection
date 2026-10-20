@@ -1,0 +1,181 @@
+{
+  "structural_profile": {
+    "rows": 1852394,
+    "columns": 19,
+    "memory_mb": 272.3,
+    "columns_detail": {
+      "transaction_id": {
+        "dtype": "str",
+        "missing": 0,
+        "unique": 1852394
+      },
+      "ts": {
+        "dtype": "datetime64[us]",
+        "missing": 0,
+        "unique": 1819551
+      },
+      "card_id": {
+        "dtype": "str",
+        "missing": 0,
+        "unique": 999
+      },
+      "merchant": {
+        "dtype": "category",
+        "missing": 0,
+        "unique": 693
+      },
+      "category": {
+        "dtype": "category",
+        "missing": 0,
+        "unique": 14
+      },
+      "amount": {
+        "dtype": "float64",
+        "missing": 0,
+        "unique": 60616
+      },
+      "gender": {
+        "dtype": "category",
+        "missing": 0,
+        "unique": 2
+      },
+      "dob": {
+        "dtype": "datetime64[us]",
+        "missing": 0,
+        "unique": 984
+      },
+      "job": {
+        "dtype": "category",
+        "missing": 0,
+        "unique": 497
+      },
+      "city": {
+        "dtype": "category",
+        "missing": 0,
+        "unique": 906
+      },
+      "state": {
+        "dtype": "category",
+        "missing": 0,
+        "unique": 51
+      },
+      "zip": {
+        "dtype": "int64",
+        "missing": 0,
+        "unique": 985
+      },
+      "city_pop": {
+        "dtype": "int64",
+        "missing": 0,
+        "unique": 891
+      },
+      "lat": {
+        "dtype": "float64",
+        "missing": 0,
+        "unique": 983
+      },
+      "lon": {
+        "dtype": "float64",
+        "missing": 0,
+        "unique": 983
+      },
+      "merch_lat": {
+        "dtype": "float64",
+        "missing": 0,
+        "unique": 1754157
+      },
+      "merch_lon": {
+        "dtype": "float64",
+        "missing": 0,
+        "unique": 1809753
+      },
+      "is_fraud": {
+        "dtype": "int8",
+        "missing": 0,
+        "unique": 2
+      },
+      "source_split": {
+        "dtype": "category",
+        "missing": 0,
+        "unique": 2
+      }
+    }
+  },
+  "consistency": {
+    "merchants": 693,
+    "merchants_with_multiple_categories": 7,
+    "cards": 999,
+    "cards_with_conflicting_profile": 0,
+    "age_min": 13.9,
+    "age_max": 96.2,
+    "ages_below_16": 12184,
+    "ages_above_100": 0
+  },
+  "outliers_train": {
+    "amount": {
+      "outlier_rows": 61564,
+      "outlier_pct": 5.19,
+      "fraud_rate_in_outliers_pct": 8.437,
+      "fraud_rate_overall_pct": 0.577,
+      "share_of_all_fraud_pct": 75.97
+    },
+    "city_pop": {
+      "outlier_rows": 222042,
+      "outlier_pct": 18.74,
+      "fraud_rate_in_outliers_pct": 0.612,
+      "fraud_rate_overall_pct": 0.577,
+      "share_of_all_fraud_pct": 19.86
+    },
+    "age": {
+      "outlier_rows": 743,
+      "outlier_pct": 0.06,
+      "fraud_rate_in_outliers_pct": 0.0,
+      "fraud_rate_overall_pct": 0.577,
+      "share_of_all_fraud_pct": 0.0
+    },
+    "distance_km": {
+      "outlier_rows": 0,
+      "outlier_pct": 0.0,
+      "fraud_rate_in_outliers_pct": null,
+      "fraud_rate_overall_pct": 0.577,
+      "share_of_all_fraud_pct": 0.0
+    }
+  },
+  "near_duplicates_train": {
+    "window_seconds": 60,
+    "rows": 0,
+    "fraud_rate_pct": null
+  },
+  "missing_train_pct": {
+    "secs_since_last_txn": 0.083,
+    "amt_to_card_mean": 0.083,
+    "amt_zscore_card": 0.165
+  },
+  "decisions": [
+    {
+      "issue": "Extreme transaction amounts (IQR outliers)",
+      "decision": "Keep all rows. Use log-scaling and train-fitted clipping for scale-sensitive models only.",
+      "reason": "Fraud is concentrated among high amounts; removing outliers would remove the signal."
+    },
+    {
+      "issue": "Near-duplicate transactions (same card, merchant and amount within a short window)",
+      "decision": "Keep and report. They have distinct transaction ids, so they are separate events.",
+      "reason": "Rapid repeats are a known fraud pattern; the velocity features capture them."
+    },
+    {
+      "issue": "Missing history features on a card's first transactions",
+      "decision": "Keep NaN in the tree view; median-impute with a missing-indicator in the linear view.",
+      "reason": "The absence of history is informative and must stay visible to the model."
+    },
+    {
+      "issue": "Skewed and heavy-tailed numeric features",
+      "decision": "No change to stored data; handled in preprocessing (log1p, clipping, scaling).",
+      "reason": "Cleaning keeps values faithful; model-specific transforms belong in preprocessing."
+    },
+    {
+      "issue": "High-cardinality text columns (merchant, job, city)",
+      "decision": "Excluded from the model matrices for now.",
+      "reason": "They need label-based encoding, which must be fitted inside the modelling step to avoid leakage."
+    }
+  ]
+}

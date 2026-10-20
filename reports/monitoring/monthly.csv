@@ -1,0 +1,9 @@
+month,transactions,frauds,fraud_rate_pct,evidently_drift_share,evidently_drifted_columns,psi_major_share,pr_auc,precision,recall,alerts,alerts_per_day,net_benefit,report,retrain_recommended,reasons
+2020-05,53834,335,0.622,0.14285714285714285,2,0.0,0.9884,0.768,0.9881,431,20.1,158328.39,reports/monitoring/drift_2020-05.html,False,
+2020-06,87805,467,0.532,0.2857142857142857,4,0.0,0.976,0.777,0.97,583,19.4,217276.76,reports/monitoring/drift_2020-06.html,False,
+2020-07,85848,321,0.374,0.2857142857142857,4,0.0,0.9589,0.7146,0.9439,424,13.7,135548.18,reports/monitoring/drift_2020-07.html,False,
+2020-08,88759,415,0.468,0.35714285714285715,5,0.0,0.9744,0.7556,0.9687,532,17.2,176447.34,reports/monitoring/drift_2020-08.html,True,36% of monitored features drifted
+2020-09,69533,340,0.489,0.14285714285714285,2,0.0,0.9735,0.7376,0.9588,442,14.7,171242.97,reports/monitoring/drift_2020-09.html,False,
+2020-10,69348,384,0.554,0.2857142857142857,4,0.0,0.9757,0.726,0.9661,511,16.5,167446.33,reports/monitoring/drift_2020-10.html,False,
+2020-11,72635,294,0.405,0.21428571428571427,3,0.0,0.9736,0.7129,0.9796,404,13.5,131617.74,reports/monitoring/drift_2020-11.html,False,
+2020-12,139538,258,0.185,0.5,7,0.308,0.9553,0.6712,0.9496,365,11.8,119069.36,reports/monitoring/drift_2020-12.html,True,50% of monitored features drifted

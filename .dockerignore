@@ -1,0 +1,11 @@
+data/
+artifacts/
+mlruns/
+reports/
+notebooks/
+archive/
+.venv*/
+venv/
+.git/
+**/__pycache__/
+platform/.env

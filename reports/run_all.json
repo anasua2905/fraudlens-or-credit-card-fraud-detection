@@ -1,0 +1,21 @@
+{
+  "stages": [
+    "explain",
+    "score",
+    "monitor",
+    "verify",
+    "bundle",
+    "publish",
+    "crawl"
+  ],
+  "seconds": {
+    "explain": 824.5,
+    "score": 16.1,
+    "monitor": 77.8,
+    "verify": 33.2,
+    "bundle": 3.8,
+    "publish": 13.7,
+    "crawl": 13.8
+  },
+  "total_seconds": 982.9
+}

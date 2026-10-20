@@ -1,0 +1,3 @@
+# FraudLens - everything needed to run the full lifecycle locally (Python 3.10-3.12).
+# Exact versions used for the submitted run are in requirements.lock.txt.
+-e .[ml,serve,platform,data,dev]
