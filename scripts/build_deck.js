@@ -16,7 +16,7 @@ const J = (f) => JSON.parse(fs.readFileSync(path.join(DIR, f), "utf8"));
 const JO = (f) => (fs.existsSync(path.join(DIR, f)) ? J(f) : null);
 const MOD = J("model_results.json"), VER = J("verification_report.json"), EXP = J("explanations.json");
 const MON = J("monitoring/summary.json"), RUN = J("pipeline_run.json"), EDA = J("eda_summary.json"), META = J("dashboard_meta.json");
-const FAIR = JO("fairness.json"), CHAL = JO("monitoring/challenger.json");
+const FAIR = JO("fairness.json"), CHAL = JO("monitoring/challenger.json"), PCI = JO("platform_ci.json");
 const CH = MOD.champion, CT = MOD.results[CH].test, CI = MOD.champion_test_ci95;
 const pf = (x, d = 1) => (100 * x).toFixed(d) + "%";
 const usd = (n) => "$" + Math.round(n).toLocaleString("en-US");
@@ -233,14 +233,14 @@ pres.addSection({ title: "Close" });
 s = pres.addSlide({ masterName: "CONTENT", sectionTitle: "Close" });
 s.addText("Managed and verified like a product", { placeholder: "title" });
 const cols = [["GitHub Project", ["Board generated from project_plan.yaml", "4 milestones, one issue per task with acceptance checklist", "Lifecycle-stage field tracks progress stage by stage"]],
-  ["CI/CD", ["ci: full lifecycle on sample data + dashboard render", "platform: Docker stack end to end, smoke tests", "deploy: build, test, publish the image"]],
+  ["CI/CD", ["ci: full lifecycle on sample data + dashboard render", PCI && PCI.smoke ? `platform: Docker stack end to end, ${PCI.smoke.passed}/${PCI.smoke.total} smoke checks pass` : "platform: Docker stack end to end, smoke tests", "deploy: build, test, publish the image"]],
   ["Quality", [`${VER.passed}/${VER.passed + VER.failed} verification checks pass`, "Train/serve parity test (caught a real bug)", "Pinned versions, one-command rebuild"]]];
 cols.forEach(([t, items], i) => {
   const x = 0.5 + i * 3.05; card(s, x, 1.2, 2.85, 3.5);
   text(s, t, { x: x + 0.2, y: 1.35, w: 2.45, h: 0.4, fontSize: 16, bold: true, color: i === 0 ? C.accent3 : i === 1 ? C.accent2 : C.accent1 });
   bullets(s, items, { x: x + 0.2, y: 1.85, w: 2.5, h: 2.7, fontSize: 13 });
 });
-s.addNotes("The project is run like a product. The GitHub Project board is generated from a plan file, with milestones and an issue per task, and a lifecycle-stage field so progress is visible stage by stage. Three workflows test the lifecycle, the whole Docker platform, and the deployable image. Fifty-six verification checks pass, including a train-to-serve parity test that caught a real precision bug during the final run.");
+s.addNotes(`The project is run like a product. The GitHub Project board is generated from a plan file, with milestones and an issue per task, and a lifecycle-stage field so progress is visible stage by stage. Three workflows test the lifecycle, the whole Docker platform, and the deployable image.${PCI && PCI.smoke ? ` On the runner every platform service starts, the sample lifecycle flows from NiFi through the lake, Trino and ClickHouse, and ${PCI.smoke.passed} of ${PCI.smoke.total} smoke checks pass${PCI.governance ? `; OpenMetadata catalogues ${PCI.governance.tables.length} tables with ${PCI.governance.pii_columns} PII-tagged columns and lineage` : ""}.` : ""} Fifty-six verification checks pass, including a train-to-serve parity test that caught a real precision bug during the final run.`);
 
 // ================================================================ 13 conclusion
 s = pres.addSlide({ masterName: "DARK", sectionTitle: "Close" });

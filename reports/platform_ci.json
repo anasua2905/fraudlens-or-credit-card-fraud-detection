@@ -1,0 +1,139 @@
+{
+ "run_id": 39430878611,
+ "run_url": "https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/runs/39430878611",
+ "commit": "a5c7b0d",
+ "date": "2026-10-20T13:40:22Z",
+ "conclusion": "success",
+ "jobs": {
+  "platform end to end": "success",
+  "governance (OpenMetadata catalog, PII tags, lineage)": "success"
+ },
+ "olap": {
+  "daily_outcomes": [
+   14.8,
+   292.6,
+   true
+  ],
+  "category_by_hour": [
+   16.3,
+   225.6,
+   true
+  ],
+  "missed_by_merchant": [
+   10.6,
+   212.0,
+   true
+  ],
+  "alert_precision_by_state": [
+   9.9,
+   232.3,
+   true
+  ]
+ },
+ "smoke": {
+  "status": "PASS",
+  "passed": 14,
+  "total": 14,
+  "checks": [
+   [
+    "lake",
+    "three layer buckets exist",
+    "PASS"
+   ],
+   [
+    "lake",
+    "raw CSVs, silver and gold tables are in the lake",
+    "PASS"
+   ],
+   [
+    "lake",
+    "analyst account cannot read the raw layer (least privilege)",
+    "PASS"
+   ],
+   [
+    "ingest",
+    "NiFi flow is running and wrote an ingest record per file",
+    "PASS"
+   ],
+   [
+    "catalog",
+    "crawler registered the lake tables in the Hive Metastore",
+    "PASS"
+   ],
+   [
+    "trino",
+    "gold row count matches what the pipeline published",
+    "PASS"
+   ],
+   [
+    "governance",
+    "Trino masks PII and hides `job` from the analyst role",
+    "PASS"
+   ],
+   [
+    "governance",
+    "BI role cannot read the raw layer",
+    "PASS"
+   ],
+   [
+    "olap",
+    "ClickHouse loaded gold and agrees with Trino",
+    "PASS"
+   ],
+   [
+    "mlflow",
+    "MLflow server has the run and the registered champion",
+    "PASS"
+   ],
+   [
+    "api",
+    "scoring API is healthy and scores a transaction",
+    "PASS"
+   ],
+   [
+    "monitoring",
+    "Prometheus scrapes the API",
+    "PASS"
+   ],
+   [
+    "monitoring",
+    "Grafana datasources (Prometheus, ClickHouse) are healthy",
+    "PASS"
+   ],
+   [
+    "bi",
+    "Superset is up with the FraudLens dashboard",
+    "PASS"
+   ]
+  ]
+ },
+ "governance": {
+  "version": "1.13.4",
+  "tables": [
+   "fraudlens_trino.hive.gold.alert_explanations",
+   "fraudlens_trino.hive.gold.daily_kpis",
+   "fraudlens_trino.hive.gold.feature_drift",
+   "fraudlens_trino.hive.gold.features",
+   "fraudlens_trino.hive.gold.model_comparison",
+   "fraudlens_trino.hive.gold.monitoring_monthly",
+   "fraudlens_trino.hive.gold.scored_transactions",
+   "fraudlens_trino.hive.raw.sparkov_test",
+   "fraudlens_trino.hive.raw.sparkov_train",
+   "fraudlens_trino.hive.silver.transactions",
+   "fraudlens_trino.hive.gold.v_alert_queue",
+   "fraudlens_trino.hive.gold.v_category_performance",
+   "fraudlens_trino.hive.gold.v_state_performance"
+  ],
+  "pii_columns": 29,
+  "upstream_of_scored": [
+   "fraudlens_trino.hive.gold.alert_explanations",
+   "fraudlens_trino.hive.gold.features",
+   "fraudlens_trino.hive.gold.features",
+   "fraudlens_trino.hive.raw.sparkov_test",
+   "fraudlens_trino.hive.raw.sparkov_train",
+   "fraudlens_trino.hive.silver.transactions",
+   "fraudlens_trino.hive.silver.transactions"
+  ],
+  "lineage_edges": 9
+ }
+}
