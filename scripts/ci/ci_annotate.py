@@ -73,3 +73,12 @@ def run(main, title: str) -> None:
                              f"{_escape(chr(10).join(_error_lines() + list(_TAIL)[-20:]))[:4000]}\n")
         sys.__stdout__.flush()
     sys.exit(code or 0)
+
+
+def notice(title: str, payload) -> None:
+    """Publish a small result (JSON) as a notice annotation, readable through the checks API."""
+    if os.environ.get("GITHUB_ACTIONS"):
+        import json
+        text = payload if isinstance(payload, str) else json.dumps(payload, separators=(",", ":"), default=str)
+        sys.__stdout__.write(f"::notice title={title}::{_escape(text)[:4000]}\n")
+        sys.__stdout__.flush()

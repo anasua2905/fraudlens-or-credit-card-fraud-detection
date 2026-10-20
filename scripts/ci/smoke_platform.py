@@ -240,6 +240,15 @@ def run(skip: set[str]) -> int:
             for r in RESULTS:
                 fh.write(f"| {r['group']} | {r['check']} | {'✅' if r['status'] == 'PASS' else '❌'} |\n")
     print(f"\n{out['status']}: {out['passed']}/{len(RESULTS)} checks passed")
+    ci_annotate.notice("platform smoke result", {"status": out["status"], "passed": out["passed"],
+                                                 "total": len(RESULTS),
+                                                 "checks": [[r["group"], r["check"], r["status"]] for r in RESULTS]})
+    olap = reports / "olap_benchmark.json"
+    if olap.exists():
+        rep = read_json(olap)
+        ci_annotate.notice("olap benchmark", {k: [v.get("clickhouse_ms", {}).get("median"),
+                                                   v.get("trino_ms", {}).get("median"), v.get("answers_agree")]
+                                               for k, v in rep.get("queries", {}).items()})
     return 0 if not failed else 1
 
 
