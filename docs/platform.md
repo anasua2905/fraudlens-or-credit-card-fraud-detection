@@ -99,7 +99,7 @@ as notices; `python scripts/ci/collect_platform_results.py` saves them to `repor
 
 ### Latest verified run
 
-[Run 39430878611](https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/runs/39430878611) on commit `992cdc8`: **both jobs passed**.
+[Run 39545146510](https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/runs/39545146510) on commit `0bf9d69`: **both jobs passed**, 16 of 16 smoke checks.
 
 | Component | Check | Result |
 |---|---|---|
@@ -114,6 +114,8 @@ as notices; `python scripts/ci/collect_platform_results.py` saves them to `repor
 | olap | ClickHouse loaded gold and agrees with Trino | pass |
 | mlflow | MLflow server has the run and the registered champion | pass |
 | api | scoring API is healthy and scores a transaction | pass |
+| api | access control: no key is refused, a scorer cannot review | pass |
+| api | a new alert reaches the review queue and its decision reaches monitoring | pass |
 | monitoring | Prometheus scrapes the API | pass |
 | monitoring | Grafana datasources (Prometheus, ClickHouse) are healthy | pass |
 | bi | Superset is up with the FraudLens dashboard | pass |
@@ -122,10 +124,10 @@ OLAP benchmark (sample data, median of five runs on the runner):
 
 | Question | Trino (ms) | ClickHouse (ms) | ClickHouse faster | Same answer |
 |---|---|---|---|---|
-| Daily caught, false and missed alerts | 293 | 14.8 | 20× | yes |
-| Fraud and alerts by category and hour | 226 | 16.3 | 14× | yes |
-| Merchants with the most missed fraud | 212 | 10.6 | 20× | yes |
-| Alert precision by state | 232 | 9.9 | 23× | yes |
+| Daily caught, false and missed alerts | 227 | 8.5 | 27× | yes |
+| Fraud and alerts by category and hour | 180 | 10.2 | 18× | yes |
+| Merchants with the most missed fraud | 200 | 6.4 | 31× | yes |
+| Alert precision by state | 169 | 5.4 | 31× | yes |
 
 Governance: OpenMetadata 1.13.4 catalogued 13 tables and views from Trino, tagged
 29 PII columns and recorded 9 lineage edges from the raw files to

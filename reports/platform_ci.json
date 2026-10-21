@@ -1,39 +1,68 @@
 {
- "run_id": 39430878611,
- "run_url": "https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/runs/39430878611",
- "commit": "992cdc8",
- "date": "2026-10-20T13:40:22Z",
+ "run_id": 39545146510,
+ "run_url": "https://github.com/anasua2905/fraudlens-or-credit-card-fraud-detection/actions/runs/39545146510",
+ "commit": "0bf9d69",
+ "date": "2026-10-21T04:49:28Z",
  "conclusion": "success",
  "jobs": {
-  "platform end to end": "success",
-  "governance (OpenMetadata catalog, PII tags, lineage)": "success"
+  "governance (OpenMetadata catalog, PII tags, lineage)": "success",
+  "platform end to end": "success"
+ },
+ "governance": {
+  "version": "1.13.4",
+  "tables": [
+   "fraudlens_trino.hive.gold.alert_explanations",
+   "fraudlens_trino.hive.gold.daily_kpis",
+   "fraudlens_trino.hive.gold.feature_drift",
+   "fraudlens_trino.hive.gold.features",
+   "fraudlens_trino.hive.gold.model_comparison",
+   "fraudlens_trino.hive.gold.monitoring_monthly",
+   "fraudlens_trino.hive.gold.scored_transactions",
+   "fraudlens_trino.hive.raw.sparkov_test",
+   "fraudlens_trino.hive.raw.sparkov_train",
+   "fraudlens_trino.hive.silver.transactions",
+   "fraudlens_trino.hive.gold.v_alert_queue",
+   "fraudlens_trino.hive.gold.v_category_performance",
+   "fraudlens_trino.hive.gold.v_state_performance"
+  ],
+  "pii_columns": 29,
+  "upstream_of_scored": [
+   "fraudlens_trino.hive.gold.alert_explanations",
+   "fraudlens_trino.hive.gold.features",
+   "fraudlens_trino.hive.gold.features",
+   "fraudlens_trino.hive.raw.sparkov_test",
+   "fraudlens_trino.hive.raw.sparkov_train",
+   "fraudlens_trino.hive.silver.transactions",
+   "fraudlens_trino.hive.silver.transactions"
+  ],
+  "lineage_edges": 9
  },
  "olap": {
   "daily_outcomes": [
-   14.8,
-   292.6,
+   8.5,
+   227.0,
    true
   ],
   "category_by_hour": [
-   16.3,
-   225.6,
+   10.2,
+   180.2,
    true
   ],
   "missed_by_merchant": [
-   10.6,
-   212.0,
+   6.4,
+   200.0,
    true
   ],
   "alert_precision_by_state": [
-   9.9,
-   232.3,
+   5.4,
+   168.7,
    true
   ]
  },
  "smoke": {
   "status": "PASS",
-  "passed": 14,
-  "total": 14,
+  "passed": 16,
+  "total": 16,
   "checks": [
    [
     "lake",
@@ -91,6 +120,16 @@
     "PASS"
    ],
    [
+    "api",
+    "access control: no key is refused, a scorer cannot review",
+    "PASS"
+   ],
+   [
+    "api",
+    "a new alert reaches the review queue and its decision reaches monitoring",
+    "PASS"
+   ],
+   [
     "monitoring",
     "Prometheus scrapes the API",
     "PASS"
@@ -106,34 +145,5 @@
     "PASS"
    ]
   ]
- },
- "governance": {
-  "version": "1.13.4",
-  "tables": [
-   "fraudlens_trino.hive.gold.alert_explanations",
-   "fraudlens_trino.hive.gold.daily_kpis",
-   "fraudlens_trino.hive.gold.feature_drift",
-   "fraudlens_trino.hive.gold.features",
-   "fraudlens_trino.hive.gold.model_comparison",
-   "fraudlens_trino.hive.gold.monitoring_monthly",
-   "fraudlens_trino.hive.gold.scored_transactions",
-   "fraudlens_trino.hive.raw.sparkov_test",
-   "fraudlens_trino.hive.raw.sparkov_train",
-   "fraudlens_trino.hive.silver.transactions",
-   "fraudlens_trino.hive.gold.v_alert_queue",
-   "fraudlens_trino.hive.gold.v_category_performance",
-   "fraudlens_trino.hive.gold.v_state_performance"
-  ],
-  "pii_columns": 29,
-  "upstream_of_scored": [
-   "fraudlens_trino.hive.gold.alert_explanations",
-   "fraudlens_trino.hive.gold.features",
-   "fraudlens_trino.hive.gold.features",
-   "fraudlens_trino.hive.raw.sparkov_test",
-   "fraudlens_trino.hive.raw.sparkov_train",
-   "fraudlens_trino.hive.silver.transactions",
-   "fraudlens_trino.hive.silver.transactions"
-  ],
-  "lineage_edges": 9
  }
 }
