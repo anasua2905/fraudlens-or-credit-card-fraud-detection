@@ -85,6 +85,24 @@ scores exactly (`float32` representation, `preprocess.MATRIX_DTYPE`). The **onli
 features as the batch pipeline from a raw transaction; a verification check compares online and batch
 features on 2,000 test transactions.
 
+The **case store** (`casework.py`, SQLite) closes the loop from a score to a decision: every scored transaction is
+stored with its features, score, threshold, reasons and SHAP contributions; alerts open a case in the review
+queue (API `/alerts`, dashboard *Case review*); the analyst's decision closes it with an audit entry; and the
+decisions feed live monitoring (live precision vs the policy floor, backlog, time to decision) and become
+labelled training data. **Access control** (`security.py`): role-based API keys (`scorer`, `analyst`, `admin`) and a
+dashboard sign-in (`analyst`, `viewer`), switched on by environment variables and always on for public links.
+
+```
+payment system ─► POST /score ─► CardStore features ─► FraudModel ─► score ≥ threshold?
+                                                                      ├─ no ─► case "approved"
+                                                                      └─ yes ─► case "open" ─► analyst decision
+                                                                                               ├─► audit log
+                                                                                               ├─► live precision, backlog
+                                                                                               │     (/monitoring/feedback,
+                                                                                               │      Prometheus, monitor.py)
+                                                                                               └─► labelled examples → retraining
+```
+
 ## 4. Key design decisions
 
 | Decision | Alternative rejected | Reason |

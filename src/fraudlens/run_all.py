@@ -51,13 +51,19 @@ def _stage(name: str, cfg: dict, opts: dict):
         return run_training(cfg)
     if name == "explain":
         from .explain import run_explain
-        return run_explain(cfg)
+        from .explain_quality import run_explain_quality
+        out = run_explain(cfg)
+        run_explain_quality(cfg)
+        return out
     if name == "score":
         from .batch_score import run_scoring
         return run_scoring(cfg)
     if name == "monitor":
         from .monitor import run_monitoring
-        return run_monitoring(cfg)
+        from .stability import run_stability
+        out = run_monitoring(cfg)
+        run_stability(cfg)
+        return out
     if name == "verify":
         from .verify import run_verification
         rep = run_verification(cfg, verify_checksums=opts.get("checksums", True))

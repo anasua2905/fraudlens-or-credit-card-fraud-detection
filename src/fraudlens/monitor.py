@@ -166,10 +166,35 @@ def run_monitoring(cfg: dict) -> dict:
         "policy": {k: mcfg[k] for k in ("drift_share_alert", "recall_floor", "precision_floor")},
         "monthly": rows,
     }
+    summary["analyst_feedback"] = analyst_feedback(cfg)
+    if (summary["analyst_feedback"] or {}).get("verdict") == "review_threshold":
+        summary["retrain_recommended"] = True
+        summary["live_flags"] = [summary["analyst_feedback"]["reason"]]
     write_json(summary, P["monitoring"] / "summary.json")
     _figure(monthly, cfg)
     _log_to_mlflow(cfg, rows, summary)
     return summary
+
+
+def analyst_feedback(cfg: dict) -> dict | None:
+    """Live monitoring from analyst decisions (`fraudlens.casework`): live precision vs the policy floor,
+    backlog and time to decision; decided cases are exported as labelled examples for retraining."""
+    import os
+
+    from .casework import CaseStore
+    db = os.environ.get("FRAUDLENS_CASE_DB") or (cfg["root"] / "data" / "cases" / "cases.db")
+    if not os.path.exists(db):
+        return None
+    store = CaseStore(db)
+    fb = store.feedback_summary(precision_floor=cfg["monitoring"]["precision_floor"])
+    examples = store.labelled_examples()
+    if len(examples):
+        out = cfg["paths"]["monitoring"] / "labelled_feedback.csv"
+        examples.to_csv(out, index=False)
+        fb["labelled_export"] = rel(out, cfg)
+    log.info("Analyst feedback: %s reviewed alerts, live precision %s, %s open; verdict %s",
+             fb["reviewed_alerts"], fb["live_precision"], fb["open_alerts"], fb["verdict"])
+    return fb
 
 
 def _log_to_mlflow(cfg: dict, rows: list[dict], summary: dict) -> None:

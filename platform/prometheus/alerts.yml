@@ -21,3 +21,17 @@ groups:
         for: 5m
         labels: {severity: warning}
         annotations: {summary: "95th percentile scoring latency above 250 ms"}
+      - alert: FraudLensLivePrecisionLow
+        expr: fraudlens_live_precision < 0.40 and fraudlens_reviewed_alerts >= 20
+        for: 30m
+        labels: {severity: warning}
+        annotations: {summary: "Analysts confirm fewer than 40% of reviewed alerts as fraud: review the threshold or the model"}
+      - alert: FraudLensReviewBacklog
+        expr: fraudlens_open_alerts > 100
+        for: 1h
+        labels: {severity: warning}
+        annotations: {summary: "More than 100 alerts are waiting for an analyst decision"}
+      - alert: FraudLensAccessDenied
+        expr: sum(increase(fraudlens_access_denied_total[15m])) > 20
+        labels: {severity: warning}
+        annotations: {summary: "Many API calls refused by access control (misconfigured client or probing)"}

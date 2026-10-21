@@ -83,11 +83,11 @@ const crit = VER.success_criteria;
 const lab = { min_test_recall: "recall · target ≥ 90%", min_test_precision: "precision · target ≥ 50%", max_alerts_per_day: "alerts/day · target ≤ 20", min_pr_auc_lift: "PR-AUC lift · target ≥ 50×" };
 const val = { min_test_recall: pf(CT.recall), min_test_precision: pf(CT.precision), max_alerts_per_day: String(CT.alerts_per_day), min_pr_auc_lift: Math.round(CT.pr_auc_lift) + "×" };
 crit.forEach((c, i) => stat(s, 0.5 + i * 2.3, 1.95, 2.1, val[c.criterion], lab[c.criterion], i % 2 ? C.accent2 : C.accent1));
-text(s, [{ text: `${usd(CT.net_benefit)} net benefit`, options: { bold: true, color: C.text2 } },
-  { text: ` on the test period: ${pf(caughtShare)} of fraud value caught, after $${META.investigation_cost} per review. All ${VER.passed} end-to-end verification checks pass.` }],
+text(s, [{ text: `≈ ${usd(CT.net_benefit)} estimated net benefit`, options: { bold: true, color: C.text2 } },
+  { text: ` on the test period (${pf(caughtShare)} of fraud value caught), assuming $${META.investigation_cost} per review and ${pf(META.recovery_rate, 0)} recovery: an estimate on simulated data, not demonstrated savings. All ${VER.passed} verification checks pass.` }],
   { x: 0.5, y: 3.55, w: 9, h: 0.6, fontSize: 15 });
 text(s, "Data: Sparkov simulated card transactions (Kaggle, CC0), 1.85 M transactions, 2019-2020, 0.52% fraud.", { x: 0.5, y: 4.5, w: 9, h: 0.4, fontSize: 12, color: C.accent6 });
-s.addNotes(`The business problem is a trade-off: catch fraud, but keep the analysts' queue small and trustworthy. We wrote four success criteria into the configuration before any model was trained. On the six months of test data the champion catches ${pf(CT.recall)} of fraud with ${pf(CT.precision)} precision at ${CT.alerts_per_day} alerts a day. In money terms that is about ${usd(CT.net_benefit)} net benefit. Accuracy is not on the slide on purpose: never alerting would be 99.6% accurate.`);
+s.addNotes(`The business problem is a trade-off: catch fraud, but keep the analysts' queue small and trustworthy. We wrote four success criteria into the configuration before any model was trained. On the six months of test data the champion catches ${pf(CT.recall)} of fraud with ${pf(CT.precision)} precision at ${CT.alerts_per_day} alerts a day. In money terms that is an estimated ${usd(CT.net_benefit)} net benefit, but note the word estimated: it assumes a review costs fifteen dollars and that ninety percent of caught fraud value is recovered, on simulated data. It ranks operating points; real savings would have to be measured in a trial. Accuracy is not on the slide on purpose: never alerting would be 99.6% accurate.`);
 
 // ================================================================ 3 lifecycle
 pres.addSection({ title: "Lifecycle" });
@@ -204,11 +204,33 @@ s = pres.addSlide({ masterName: "CONTENT", sectionTitle: "Deployment" });
 s.addText("Deployed: scoring API and analyst dashboard", { placeholder: "title" });
 [w, h] = fitImage("dashboard_live_scoring.png", 6.1, 3.85);
 img(s, "dashboard_live_scoring.png", 0.5, 1.15, w, h);
-bullets(s, ["FastAPI /score: online feature store computes card history in real time; SHAP reasons; /feedback; /metrics",
-  "Streamlit: alert queue, live scoring, threshold & cost what-if, monitoring, report",
-  "One 40 MB bundle: model + threshold + feature store; container image ghcr.io/…/fraudlens-app",
-  "Deployed with public links; hosted option: Streamlit Community Cloud from the repository"], { x: 0.6 + w + 0.2, y: 1.2, w: 9.5 - (0.6 + w + 0.2), h: 3.6, fontSize: 12 });
+bullets(s, ["FastAPI /score: online feature store computes card history in real time; SHAP reasons and a counterfactual",
+  "Review queue: /alerts and /alerts/{id}/decision; the dashboard's Case review tab",
+  "Access control: role-based API keys (scorer, analyst, admin); dashboard sign-in (analyst, viewer); audit log",
+  "One 40 MB bundle; container image ghcr.io/…/fraudlens-app; public links with access control on"], { x: 0.6 + w + 0.2, y: 1.2, w: 9.5 - (0.6 + w + 0.2), h: 3.6, fontSize: 12 });
 s.addNotes("Deployment has two faces. The FastAPI service scores a raw transaction in real time: the online feature store keeps every card's running history, the model scores, and SHAP gives the reasons. The Streamlit dashboard is for analysts and managers. Here you see live scoring: a simulated card-testing burst of six rising amounts three minutes apart is flagged at 0.94 with readable reasons. Both run from one 40-megabyte bundle and are packaged as a container image. [Switch to the live demo here.]");
+
+// ================================================================ 10b live path
+s = pres.addSlide({ masterName: "CONTENT", sectionTitle: "Deployment" });
+s.addText("A new transaction, from features to an analyst decision", { placeholder: "title" });
+const steps = [["1 Received", "POST /score or the dashboard's Live transaction tab"],
+  ["2 Features", "online feature store: card history, velocity 1 h / 24 h / 7 d"],
+  ["3 Inference", "score vs threshold, SHAP reasons, counterfactual amount"],
+  ["4 Routed", "alert → case opened in the review queue; else approved"],
+  ["5 Decision", "analyst: fraud / legitimate + note; audit log"]];
+steps.forEach(([t, d], i) => {
+  const x = 0.4 + i * 1.86;
+  card(s, x, 1.15, 1.72, 1.55);
+  text(s, t, { x: x + 0.12, y: 1.25, w: 1.5, h: 0.35, fontSize: 14, bold: true, color: i === 4 ? C.accent1 : C.text2 });
+  text(s, d, { x: x + 0.12, y: 1.62, w: 1.5, h: 1.0, fontSize: 11 });
+});
+card(s, 0.4, 2.95, 9.2, 1.95);
+text(s, "How decisions inform monitoring", { x: 0.6, y: 3.05, w: 8.8, h: 0.35, fontSize: 15, bold: true, color: C.accent3 });
+bullets(s, ["Live precision (confirmed ÷ reviewed alerts) with a 95% interval vs the 40% floor → threshold/model review, Prometheus alert",
+  "Fraud reported on approved transactions = live misses; backlog and time to decision = workload",
+  "Every decided case keeps its exact model inputs → labelled examples for the next champion/challenger"],
+  { x: 0.6, y: 3.45, w: 8.8, h: 1.4, fontSize: 12.5 });
+s.addNotes("This answers the main question from the last review: what happens to a transaction we have never seen. It arrives at the scoring API, or here in the dashboard, which runs the same code. The online feature store computes its card-history features from the card's earlier transactions. The champion scores it, SHAP explains the score, and for an alert we also show the amount at which it would have been approved. An alert opens a case in the review queue; the analyst sees exactly what the model saw and records fraud or legitimate, with their name in the audit log. Those decisions are labels: live precision is tracked against the policy floor and alerts in Prometheus if it drops, disputes on approved transactions count as misses, and every decided case becomes a training example for the next model. Access is controlled throughout: API keys by role and a dashboard sign-in where only analysts can decide.");
 
 // ================================================================ 11 monitoring
 s = pres.addSlide({ masterName: "CONTENT", sectionTitle: "Deployment" });

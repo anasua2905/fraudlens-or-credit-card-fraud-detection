@@ -196,6 +196,8 @@ services:
     environment:
       FRAUDLENS_MODEL_DIR: /app/dashboard/bundle
       FRAUDLENS_FEEDBACK_FILE: /feedback/feedback.csv
+      FRAUDLENS_CASE_DB: /feedback/cases.db              # cases, analyst decisions, audit log
+      FRAUDLENS_API_KEYS: ${FRAUDLENS_API_KEYS:-}        # role-based access control (see .env.example)
     ports: ["8000:8000"]
     restart: unless-stopped        # waits for the model bundle if the pipeline has not produced it yet
     volumes:

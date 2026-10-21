@@ -71,31 +71,83 @@ print(f"average in-process scoring latency incl. feature computation and SHAP re
 ("md", r"""
 ## 7.3 The model API (FastAPI)
 
-Endpoints: `GET /health`, `GET /model`, `POST /score`, `POST /score/batch`, `POST /feedback` (analyst
-verdicts) and `GET /metrics` (Prometheus). Interactive documentation is served at `/docs`. Here the app is
-called in-process with FastAPI's test client, which runs exactly the same code as the deployed container.
+Endpoints: `GET /health`, `GET /model`, `POST /score`, `POST /score/batch`, the review queue `GET /alerts`,
+`GET /alerts/{id}`, `POST /alerts/{id}/decision`, `POST /feedback` (verdicts by transaction id),
+`GET /monitoring/feedback` and `GET /metrics` (Prometheus). Interactive documentation is served at `/docs`.
+Here the app is called in-process with FastAPI's test client, which runs exactly the same code as the
+deployed container, with **role-based API keys switched on** (`scorer`, `analyst`).
 """),
 ("code", r"""
 import importlib, tempfile
 os.environ["FRAUDLENS_MODEL_DIR"] = str(bundle)
-os.environ["FRAUDLENS_FEEDBACK_FILE"] = str(Path(tempfile.mkdtemp()) / "feedback.csv")
+tmp = Path(tempfile.mkdtemp())
+os.environ["FRAUDLENS_FEEDBACK_FILE"] = str(tmp / "feedback.csv")
+os.environ["FRAUDLENS_CASE_DB"] = str(tmp / "cases.db")
+os.environ["FRAUDLENS_API_KEYS"] = "scorer:demo-scorer-key,analyst:demo-analyst-key"
+S, A = {"X-API-Key": "demo-scorer-key"}, {"X-API-Key": "demo-analyst-key"}
 from fastapi.testclient import TestClient
 import fraudlens.api as api
 api = importlib.reload(api)
 client = TestClient(api.app)
 
 print("GET /health ->", client.get("/health").json())
-r = client.post("/score", json=txn, params={"update_state": False}).json()
-print("POST /score ->", json.dumps({k: r[k] for k in ("score", "alert", "threshold", "model", "reasons")}, indent=1))
-batch = client.post("/score/batch", json=[txn, {**txn, "amount": 8.0}], params={"update_state": False}).json()
+print("POST /score without a key ->", client.post("/score", json=txn).status_code, "(401: access control)")
+r = client.post("/score", json=txn, params={"update_state": False}, headers=S).json()
+print("POST /score ->", json.dumps({k: r[k] for k in ("score", "alert", "threshold", "model", "reasons", "case_id", "routed_to")}, indent=1))
+batch = client.post("/score/batch", json=[txn, {**txn, "amount": 8.0}], params={"update_state": False}, headers=S).json()
 print("POST /score/batch ->", [(b["amount"], b["score"], b["alert"]) for b in batch])
-print("POST /feedback ->", client.post("/feedback", json={"transaction_id": "demo-1", "label": "fraud", "was_alert": True,
-                                                          "score": r["score"], "analyst": "notebook"}).json())
-print("POST /score with amount=-1 ->", client.post("/score", json={**txn, "amount": -1}).status_code, "(rejected by validation)")
-metrics = client.get("/metrics").text
-print("\n".join(l for l in metrics.splitlines() if l.startswith(("fraudlens_transactions_scored_total", "fraudlens_alerts_total", "fraudlens_feedback_total"))))
+print("POST /score with amount=-1 ->", client.post("/score", json={**txn, "amount": -1}, headers=S).status_code, "(rejected by validation)")
 """),
 ("md", r"""
+### 7.3.1 A new transaction, end to end: features → inference → review queue → decision → monitoring
+
+A card-testing burst on a known card: six rising amounts three minutes apart, sent to `POST /score` as the
+payment system would. Each response shows the features the online store generated, the score against the
+threshold and where the transaction was routed. Alerts wait in the review queue; an analyst opens one,
+records a decision, and the decision flows into the feedback monitoring.
+"""),
+("code", r"""
+card = txn["card_id"]
+t0 = pd.Timestamp(txn["ts"])
+rows = []
+for i, amt in enumerate([2.0, 5.0, 25.0, 180.0, 650.0, 1200.0]):
+    t = {**txn, "amount": amt, "ts": (t0 + pd.Timedelta(minutes=3 * i)).isoformat(), "transaction_id": f"burst-{i + 1}",
+         "category": "shopping_net" if i > 2 else "misc_net", "merchant": "Burst Merchant"}
+    out = client.post("/score", json=t, params={"include_features": True}, headers=S).json()
+    f = out["features"]
+    rows.append({"step": i + 1, "amount": amt, "txns past 1h": f["txn_count_1h"], "spend past 24h": f["amt_sum_24h"],
+                 "amount / card mean": round(f["amt_to_card_mean"] or 0, 1), "score": out["score"],
+                 "routed to": out["routed_to"], "case": out["case_id"]})
+pd.DataFrame(rows)
+"""),
+("code", r"""
+queue = client.get("/alerts", headers=A).json()
+if not queue:   # no alert in the burst for this card: send one clear night-time outlier
+    client.post("/score", headers=S, json={**txn, "amount": 1500.0, "category": "shopping_net", "transaction_id": "night-1",
+                                           "ts": (t0.normalize() + pd.Timedelta(days=1, hours=2)).isoformat()})
+    queue = client.get("/alerts", headers=A).json()
+print(f"review queue: {len(queue)} open case(s)")
+case = client.get(f"/alerts/{queue[0]['case_id']}", headers=A).json()
+print(json.dumps({k: case[k] for k in ("case_id", "amount", "score", "threshold", "reasons", "clear_below_amount")}, indent=1))
+print("top contributions:", [(c["feature"], c["shap"]) for c in case["contributions"][:3]])
+print("scorer key on the queue ->", client.get("/alerts", headers=S).status_code, "(403: wrong role)")
+d = client.post(f"/alerts/{case['case_id']}/decision", headers=A,
+                json={"label": "fraud", "analyst": "notebook-analyst", "note": "customer confirmed card was stolen"}).json()
+print("decision ->", d["case"])
+fb = client.get("/monitoring/feedback", headers=A).json()
+print("feedback monitoring ->", {k: fb[k] for k in ("reviewed_alerts", "confirmed_fraud", "live_precision",
+                                                    "live_precision_ci95", "open_alerts", "labelled_examples", "verdict")})
+print(api.CASES.audit_log()[["at", "actor", "role", "action", "case_id"]].head(4).to_string(index=False))
+metrics = client.get("/metrics").text
+print("\n".join(l for l in metrics.splitlines() if l.startswith(("fraudlens_open_alerts", "fraudlens_reviewed_alerts",
+                                                                 "fraudlens_live_precision", "fraudlens_access_denied_total"))))
+del os.environ["FRAUDLENS_API_KEYS"]
+"""),
+("md", r"""
+The analyst's decision is a label. With at least 20 decisions, live precision is compared with the 40% policy
+floor; `python -m fraudlens.monitor` adds this block to the monitoring summary and exports the decided cases
+(with the exact model inputs used) as labelled examples for the next retraining.
+
 ## 7.4 The dashboard (Streamlit + Plotly)
 
 `dashboard/app.py` is the analysts' and managers' interface. It runs from the full pipeline output locally,
@@ -113,13 +165,14 @@ print("headline metrics:", [(m.label, m.value) for m in at.metric][:8])
 ("md", r"""
 | Tab | Who uses it | What it does |
 |---|---|---|
-| Overview | manager | KPIs for any period and split, daily alerts and outcomes, money caught and missed |
-| Alert queue | analyst | ranked cards and transactions with SHAP reasons; record a verdict (feedback) |
-| Live scoring | analyst / demo | type a transaction, get score, alert and reasons from the same runtime as the API |
-| Threshold & cost | manager | move the threshold or the review cost and see recall, precision, alerts/day and net benefit change |
+| Overview | manager | KPIs for any period and split, daily alerts and outcomes, money caught and missed, estimated net benefit with its assumptions |
+| Live transaction | analyst / demo | a new transaction end to end: received → features → score and explanation → routed to review |
+| Case review | analyst | the review queue of live alerts; record decisions; how decisions feed monitoring |
+| Alert history | analyst | the replayed test period by card, with SHAP reasons |
+| Threshold & cost | manager | move the threshold or the cost assumptions and see recall, precision, alerts/day and estimated net benefit change |
 | Patterns | analyst | fraud by category, hour, amount band and state |
-| Monitoring | data scientist | monthly drift and performance, retraining recommendation |
-| Model | governance | model comparison, selection rule, SHAP importance, test metrics |
+| Monitoring | data scientist | monthly drift and performance, monthly stability with intervals, live feedback, retraining recommendation |
+| Model | governance | model comparison, selection rule, SHAP importance, explanation quality, transferability to real data |
 | Data pipeline | data engineering | lineage from raw to gold, data quality and verification results |
 | Report | manager | a plain-language summary of the selected period, downloadable |
 

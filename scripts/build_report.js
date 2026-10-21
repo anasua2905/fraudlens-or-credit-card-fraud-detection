@@ -27,7 +27,8 @@ const VER = J("verification_report.json"), EXP = J("explanations.json"), META = 
 const MON = J("monitoring/summary.json"), MAN = J("acquisition_manifest.json");
 const FAIR = JO("fairness.json"), CHAL = JO("monitoring/challenger.json");
 const OLAP = JO("olap_benchmark.json"), GOV = JO("governance_catalog.json"), SMOKE = JO("platform_smoke.json");
-const PCI = JO("platform_ci.json");        // the platform workflow's results (scripts/ci/collect_platform_results.py)
+const PCI = JO("platform_ci.json");
+const STAB = JO("stability.json"), EQ = JO("explanation_quality.json");        // the platform workflow's results (scripts/ci/collect_platform_results.py)
 const OLAP_Q = { daily_outcomes: "Daily caught, false and missed alerts", category_by_hour: "Fraud and alerts by category and hour",
   missed_by_merchant: "Merchants with the most missed fraud", alert_precision_by_state: "Alert precision by state" };
 
@@ -132,7 +133,7 @@ const titlePage = [
 add(H1("Executive Summary"));
 add(P(`FraudLens is an end-to-end anomaly detection framework for card fraud, built through all eight stages of the data science lifecycle (problem understanding, acquisition, preparation, exploratory analysis, modelling, evaluation and interpretation, deployment and visualisation, monitoring and improvement) and implemented on an open-source data platform that mirrors a modern cloud data pipeline: MinIO object storage, Apache NiFi ingestion, an Apache Hive Metastore catalog, governance through Trino access rules, MinIO policies and OpenMetadata, analytics with Trino and ClickHouse, and visualisation with Superset, Grafana and a Streamlit dashboard.`));
 add(P(`The data are the Sparkov simulated transactions: ${int(totalRows)} transactions from 2019 to 2020, of which ${pv(100 * (splits.train.fraud_count + splits.val.fraud_count + splits.test.fraud_count) / totalRows)} are fraudulent. Exploratory analysis showed that fraud is concentrated in large amounts relative to a card's history, at night (${pv(night.share_of_frauds_pct, 1)} of training fraud between 22:00 and 03:59), in bursts on compromised cards, and in online and grocery point-of-sale categories.`));
-add(P(`Six models were tuned with time-series cross-validation and compared on a later validation period. A pre-registered rule selected the simplest model that is statistically non-inferior to the best: **${nm(CH)}** (scikit-learn). On the untouched test period (21 June to 31 December 2020) it detects **${pf(CT.recall)} of fraud** with **${pf(CT.precision)} precision** at **${CT.alerts_per_day} alerts per day**, a PR-AUC of ${f3(CT.pr_auc)} (${Math.round(CT.pr_auc_lift)}× the random baseline), and catches ${pf(fraudValueShare)} of the fraud value, for an estimated net benefit of **${usd(CT.net_benefit)}** after review costs. All four success criteria set before modelling are met, and all ${VER.passed} automated end-to-end verification checks pass.`));
+add(P(`Six models were tuned with time-series cross-validation and compared on a later validation period. A pre-registered rule selected the simplest model that is statistically non-inferior to the best: **${nm(CH)}** (scikit-learn). On the untouched test period (21 June to 31 December 2020) it detects **${pf(CT.recall)} of fraud** with **${pf(CT.precision)} precision** at **${CT.alerts_per_day} alerts per day**, a PR-AUC of ${f3(CT.pr_auc)} (${Math.round(CT.pr_auc_lift)}× the random baseline), and catches ${pf(fraudValueShare)} of the fraud value, for an estimated net benefit of **${usd(CT.net_benefit)}** (an estimate assuming $${META.investigation_cost} per review and ${pf(RECOVERY, 0)} of caught fraud value recovered, on simulated data, not demonstrated savings). All four success criteria set before modelling are met, and all ${VER.passed} automated end-to-end verification checks pass.`));
 add(P(`The system is deployed as a FastAPI scoring service with an online feature store and SHAP explanations, and a Streamlit dashboard for analysts and managers; both run from a self-contained 40 MB bundle, are packaged as a container image, and were deployed with public links. Monthly monitoring with Evidently AI flagged seasonal feature drift in August and December 2020 without a loss of recall, and a champion/challenger retraining test shows how the improvement loop works. The project is managed with a GitHub Project board and CI/CD workflows. The data are simulated, so the absolute results validate the method rather than forecast production accuracy.`));
 
 // -------------------------------------------------------- 1. problem understanding
@@ -264,13 +265,20 @@ add(table(["Metric", "Value", "95% CI"], [
   ["False-positive rate", pf(CT.false_positive_rate, 3), `${pf(CI.false_positive_rate.low, 2)} - ${pf(CI.false_positive_rate.high, 2)}`],
   ["Alerts per day", String(CT.alerts_per_day), "-"],
   ["Alerts / true positives / false positives / missed", `${int(CT.alerts)} / ${int(CT.true_positives)} / ${int(CT.false_positives)} / ${int(CT.false_negatives)}`, "-"],
-  ["Net benefit", usd(CT.net_benefit), `${usd(CI.net_benefit.low)} - ${usd(CI.net_benefit.high)}`],
+  [`Estimated net benefit (assumes $${META.investigation_cost}/review, ${pf(RECOVERY, 0)} recovered)`, usd(CT.net_benefit), `${usd(CI.net_benefit.low)} - ${usd(CI.net_benefit.high)}`],
 ], [6, 4, 4]));
 add(figure("11_threshold_sweep_validation.png", "Validation sweep: recall, precision and net benefit across alert volumes."));
 add(H2("7.2 Business impact"));
-add(P(`At ${CT.alerts_per_day} alerts a day the champion catches ${pf(fraudValueShare)} of the fraud value in the test period (${usd(caughtRaw)} of ${usd(caughtRaw + CT.fraud_amount_missed)}); recovering ${pf(RECOVERY, 0)} of it and paying $${META.investigation_cost} per review leaves a net benefit of ${usd(CT.net_benefit)}. Roughly ${Math.round(1 / CT.precision * 10) / 10} alerts are reviewed per fraud caught. Lowering the threshold to the alert-budget point would only pay if a review cost less than ${usd(MOD.break_even_review_cost, 2)}. Missed fraud is concentrated in small transactions, where an alert costs more than it recovers.`));
+add(P(`At ${CT.alerts_per_day} alerts a day the champion catches ${pf(fraudValueShare)} of the fraud value in the test period (${usd(caughtRaw)} of ${usd(caughtRaw + CT.fraud_amount_missed)}); assuming ${pf(RECOVERY, 0)} of it is recovered and a review costs $${META.investigation_cost}, the estimated net benefit is ${usd(CT.net_benefit)}. This is an estimate under those two assumptions on simulated transactions, used to compare operating points; it is not a demonstrated saving, which would need a trial on real transactions with measured review costs and recoveries. Roughly ${Math.round(1 / CT.precision * 10) / 10} alerts are reviewed per fraud caught. Lowering the threshold to the alert-budget point would only pay if a review cost less than ${usd(MOD.break_even_review_cost, 2)}. Missed fraud is concentrated in small transactions, where an alert costs more than it recovers.`));
 add(H2("7.3 Stability, calibration and fairness"));
 add(P(`Monthly recall on the test period ranges from ${pf(recallRange[0])} to ${pf(recallRange[1])} and precision from ${pf(precRange[0])} to ${pf(precRange[1])}. Scores rank well but are not calibrated probabilities (class weighting inflates them); the threshold is therefore defined in score units on validation.`));
+if (STAB) {
+  const ci = (a) => `${f3(a[0])}-${f3(a[1])}`;
+  add(TCAP("Monthly stability on the test period at the deployed threshold (Wilson 95% intervals)."));
+  add(table(["Month", "Frauds", "Recall", "95% CI", "Precision", "95% CI", "Alerts/day"], STAB.monthly.months.map((m) =>
+    [m.month, int(m.frauds), f3(m.recall), ci(m.recall_ci95), f3(m.precision), ci(m.precision_ci95), String(m.alerts_per_day)]), [2, 2, 2, 3, 2, 3, 2]));
+  add(P(`Every month stays above the policy floors (recall ${pf(MON.policy.recall_floor, 0)}, precision ${pf(MON.policy.precision_floor, 0)}), and a chi-square test finds no more variation between months than chance (recall p = ${STAB.monthly.chi2_p_recall.toFixed(2)}, precision p = ${STAB.monthly.chi2_p_precision.toFixed(2)}). The same check runs after every monitoring cycle (fraudlens.stability).`));
+}
 if (FAIR) {
   add(TCAP("Performance by group on the test period."));
   add(table(["Group", "Value", "Transactions", "Frauds", "Recall", "False alarms per 10k", "Precision"], FAIR.map((r) =>
@@ -281,19 +289,51 @@ if (FAIR) {
 }
 add(H2("7.4 Explainability"));
 add(P(`SHAP explains every score in log-odds contributions. For this champion's native categorical splits TreeSHAP's values did not reproduce the model output, so the pipeline automatically switched to SHAP's permutation explainer on the same output, which is exactly additive. The largest average contributions are ${SHAP.slice(0, 5).map(([f, v]) => `${f} (${Number(v).toFixed(2)})`).join(", ")}, consistent with the EDA. Every alert carries its top three reasons into the dashboard and the API. ELI5 weights of the logistic baseline and a Yellowbrick precision-recall curve of the champion (notebook 06) give independent views of the same picture.`));
+if (EQ) {
+  const d = EQ.deletion;
+  add(P(`**Are the explanations faithful?** On ${EQ.alerts_sampled} sampled test-period alerts, replacing each alert's top-${EQ.top_k} SHAP features with typical values lowers its score by ${f3(d.mean_score_drop_top_k)} on average, against ${f3(d.mean_score_drop_random_k)} when ${EQ.top_k} random features are replaced (${d.ratio_top_vs_random}× more), and clears ${pf(d.share_cleared_top_k, 0)} of the alerts against ${pf(d.share_cleared_random_k, 0)}. Explaining the same alerts with a different random seed gives a top-${EQ.top_k} overlap (Jaccard) of ${f3(EQ.stability.mean_top_k_jaccard)}; the median additivity error is ${EQ.additivity.median_abs_error_log_odds} log-odds. The reasons analysts see therefore point at what the model actually used. Each live alert also carries a counterfactual: a lower amount at which it would have been approved with the same card history.`));
+}
 add(figure("17_shap_beeswarm.png", "SHAP beeswarm: how each feature's value moves the score (test period).", 430));
+if (STAB && STAB.prevalence) {
+  const pv = STAB.prevalence;
+  add(H2("7.5 How far the results transfer to real transactions"));
+  add(P(`The data are simulated, so the test metrics are an optimistic guide. Precision depends on how common fraud is and on how many false alarms real customers trigger. The table carries the test recall (${pf(pv.recall)}) and false-positive rate (${(100 * pv.false_positive_rate).toFixed(3)}%) over to other fraud rates and to two and five times as many false alarms, at ${int(pv.transactions_per_day)} transactions a day.`));
+  add(TCAP("Precision and alert volume under other conditions (same recall)."));
+  add(table(["Fraud rate", "Precision", "Alerts/day", "Precision, 2× false alarms", "Precision, 5× false alarms"], pv.rows.map((r) =>
+    [`${r.fraud_rate_pct.toFixed(2)}%${r.is_test_rate ? " (test)" : ""}`, pf(r.precision_fpr_x1, 0), String(r.alerts_per_day_fpr_x1), pf(r.precision_fpr_x2, 0), pf(r.precision_fpr_x5, 0)]), [3, 2, 2, 3, 3]));
+  add(P("Before relying on the model with real customers it would run in shadow mode (scoring without blocking) and be compared with chargebacks, the threshold would be re-chosen on real validation data, the monthly and per-segment stability checks would be repeated, and the real review cost and recovery rate would be measured before any savings are claimed."));
+}
 add(figure("18_shap_waterfall_caught_fraud.png", "Local explanation of a caught fraud.", 430));
 
 // -------------------------------------------------------- 8. deployment
 add(PAGEBREAK(), H1("8. Deployment and Visualisation"));
 add(H2("8.1 Serving"));
-add(P("The FastAPI service scores raw transactions in real time: an online feature store keeps each card's running statistics and recent window and computes the same features as the batch pipeline (a verification check compares 2,000 test transactions), the champion scores them, and alerts come with SHAP and plain-language reasons. Endpoints: /score, /score/batch, /feedback (analyst verdicts), /metrics (Prometheus), /health and /model; invalid inputs are rejected by schema validation."));
-add(H2("8.2 Dashboard"));
-add(P("The Streamlit dashboard has nine tabs: Overview (KPIs, daily outcomes, money caught and missed), Alert queue (ranked cards, reasons, feedback), Live scoring (the API's runtime in the browser, including a simulated card-testing burst), Threshold & cost (what-if trade-off), Patterns, Monitoring, Model, Data pipeline and Report. All views recompute from the sidebar filters, threshold and cost assumptions."));
+add(P("The FastAPI service scores raw transactions in real time: an online feature store keeps each card's running statistics and recent window and computes the same features as the batch pipeline (a verification check compares 2,000 test transactions), the champion scores them, and alerts come with SHAP and plain-language reasons and a counterfactual amount. Endpoints: /score and /score/batch (payment system), /alerts, /alerts/{id} and /alerts/{id}/decision (review queue and decisions), /feedback (verdicts by transaction id, e.g. chargebacks), /monitoring/feedback, /metrics (Prometheus), /health and /model; invalid inputs are rejected by schema validation."));
+add(H2("8.2 A new transaction, from features to an analyst decision"));
+add(P("The complete path of a newly received transaction is implemented and tested end to end (tests/test_serving.py and the platform smoke test):"));
+add(BULLET("**Received.** The payment system sends the raw transaction to POST /score (or an analyst enters it in the dashboard's Live transaction tab, which runs the same code)."));
+add(BULLET("**Feature generation.** The online feature store derives the card-history features from the card's earlier transactions: count and average spend, amount relative to the average, z-score, time since the last transaction, velocity over 1 hour, 24 hours and 7 days, new merchant and night-time."));
+add(BULLET("**Model inference.** The champion scores the features against the validation-chosen threshold; SHAP gives the top contributions and, for an alert, a counterfactual amount at which it would have been approved."));
+add(BULLET("**Routing.** Every scored transaction is stored as a case with its features, score, threshold and explanation (fraudlens.casework). An alert opens the case in the review queue; other transactions are approved and logged."));
+add(BULLET("**Analyst decision.** In the dashboard's Case review tab (or GET /alerts and POST /alerts/{id}/decision) the analyst sees what the model saw and records Confirmed fraud or Legitimate with a note; the case closes and the decision is written to an audit log with the analyst's name."));
+add(P("**How the decisions inform monitoring.** Decisions are labels, used in three ways. Live precision (confirmed ÷ reviewed alerts) is tracked with a Wilson 95% interval against the 40% policy floor; if the whole interval falls below it (with at least 20 decisions) monitoring raises a threshold/model review, which appears in the monitoring summary, the Prometheus gauge fraudlens_live_precision and an alert rule. Fraud labels on approved transactions (disputes) count as misses, the live counterpart of recall. And every decided case keeps the exact model inputs, so monitoring exports them as labelled examples for the next champion/challenger comparison; the backlog and time to decision show whether the alert volume is manageable."));
+add(figure("img:dashboard_live_path.png", "Live transaction tab: received, features generated, model inference with explanation, routed to the review queue.", 440));
+add(figure("img:dashboard_case_review.png", "Case review tab: the open case, the decision form and how decisions feed monitoring.", 440));
+add(H2("8.3 Access control"));
+add(TCAP("Deployment access controls."));
+add(table(["Layer", "Control"], [
+  ["Scoring API", "Role-based API keys in the X-API-Key header: scorer (score), analyst (review queue, decisions, feedback monitoring), admin; 401 without a key, 403 for the wrong role; refusals counted in Prometheus"],
+  ["Dashboard", "Sign-in with named users: analysts may record decisions, viewers only explore; the signed-in name is stored with every decision"],
+  ["Audit", "Every scoring call and decision is logged in the case store with role, time and a non-secret key id"],
+  ["Network", "API and dashboard bind to 127.0.0.1 and are exposed only through the tunnel; /health and /metrics carry no transaction data"],
+  ["Data", "Card numbers pseudonymised; Trino masks quasi-identifiers and denies the job column to analysts; least-privilege MinIO accounts"]], [3, 10]));
+add(P("Public deployments switch access control on automatically (scripts/deploy/run_local.ps1 -Public generates keys and two dashboard accounts, kept out of the repository); without it the services run in a clearly labelled development mode."));
+add(H2("8.4 Dashboard"));
+add(P("The Streamlit dashboard has ten tabs: Overview (KPIs, daily outcomes, money caught and missed, estimated net benefit with its assumptions), Live transaction (the end-to-end path above), Case review (the analyst workflow and feedback monitoring), Alert history (the replayed test period by card), Threshold & cost (what-if trade-off), Patterns, Monitoring (drift, monthly stability, live feedback), Model (selection, SHAP, explanation quality, transferability), Data pipeline and Report. All views recompute from the sidebar filters, threshold and cost assumptions."));
 add(figure("img:dashboard_overview.png", "Dashboard, Overview tab (test period, deployed threshold).", 440));
-add(figure("img:dashboard_live_scoring.png", "Dashboard, Live scoring tab: a simulated card-testing burst is flagged, with its reasons.", 440));
+
 add(figure("img:dashboard_threshold_cost.png", "Dashboard, Threshold & cost tab: the operating-point trade-off.", 440));
-add(H2("8.3 Lake, catalog and BI"));
+add(H2("8.5 Lake, catalog and BI"));
 add(P("The publish stage writes silver and gold as Hive-partitioned Parquet to MinIO; the crawler infers schemas from Parquet footers and CSV headers and registers external tables and BI views in the Hive Metastore through Trino; Superset builds the fraud-operations dashboard on Trino; the OLAP stage loads the gold tables into ClickHouse through a named collection that uses the read-only analyst account, then answers four business questions on both engines and checks the answers agree."));
 if (OLAP && OLAP.status !== "skipped") {
   add(TCAP("Same questions, two engines (median of five runs, platform CI run)."));
@@ -306,12 +346,12 @@ if (!(OLAP && OLAP.status !== "skipped") && PCI && PCI.olap) {
     [OLAP_Q[k] || k, String(v[1]), String(v[0]), v[2] ? "Yes" : "No"]), [7, 2, 2, 2]));
 }
 if (PCI && PCI.smoke) {
-  add(H2("8.4 The platform, verified end to end"));
+  add(H2("8.6 The platform, verified end to end"));
   add(P(`The platform workflow starts every service on a GitHub runner, runs the whole lifecycle on synthetic sample data through NiFi, the lake, the crawler, Trino and ClickHouse, then checks each component. Run ${PCI.run_id} (commit ${PCI.commit}) passed ${PCI.smoke.passed} of ${PCI.smoke.total} smoke checks${PCI.governance ? `; its governance job catalogued ${PCI.governance.tables.length} tables and views in OpenMetadata ${PCI.governance.version}, tagged ${PCI.governance.pii_columns} PII columns and recorded ${PCI.governance.lineage_edges} lineage edges from raw to gold` : ""}.`));
   add(TCAP("Platform smoke checks (platform workflow)."));
   add(table(["Component", "Check", "Result"], PCI.smoke.checks.map(([g, c, r]) => [g, c, r === "PASS" ? "Pass" : "Fail"]), [2, 9, 2]));
 }
-add(H2(PCI && PCI.smoke ? "8.5 Deployment" : "8.4 Deployment"));
+add(H2(PCI && PCI.smoke ? "8.7 Deployment" : "8.6 Deployment"));
 add(TCAP("Deployment targets."));
 const dRows = [
   ["Local (Windows, no Docker)", "scripts/deploy/run_local.ps1 starts the API and the dashboard; -Public adds Cloudflare quick-tunnel links", DEPLOY.tunnel_dashboard_url ? "Deployed during the project" : "Script"],
@@ -333,7 +373,7 @@ if (CHAL) {
   const c0 = CHAL.comparison[0], c1 = CHAL.comparison[1], g = CHAL.pr_auc_gap_challenger_minus_champion;
   add(P(`**Champion/challenger.** Retraining the same algorithm on the training plus validation periods and comparing at the same alert budget on the test period gives PR-AUC ${f4(c1.pr_auc)} for the challenger against ${f4(c0.pr_auc)} for the champion (gap ${f4(g.gap_mean)}, 95% CI [${f4(g.ci95_low)}, ${f4(g.ci95_high)}]); under the promotion rule (${CHAL.rule}) the challenger ${CHAL.promote ? "would be promoted" : "would not be promoted"}. The test period is used here only to illustrate the loop; in production the comparison runs on the next labelled period, so the champion's reported test results stay untouched.`));
 }
-add(P("Operationally, the API exports Prometheus metrics (transactions, alerts, latency, score distribution, cold-start cards, feedback, monitoring verdict); Prometheus evaluates alert rules (API down, alert-rate spike, slow scoring, retraining recommended) and Grafana shows an operations dashboard and a ClickHouse business dashboard. Analyst verdicts recorded through /feedback close the loop into the next retraining; the runbook (docs/monitoring_runbook.md) describes promotion and rollback."));
+add(P("Operationally, the API exports Prometheus metrics (transactions, alerts, latency, score distribution, cold-start cards, feedback, monitoring verdict); Prometheus evaluates alert rules (API down, alert-rate spike, slow scoring, retraining recommended) and Grafana shows an operations dashboard and a ClickHouse business dashboard. In live operation the labels come from analyst decisions in the case store (section 8.2): live precision with its confidence interval, missed fraud reported on approved transactions, the review backlog and the time to decision are added to the monitoring summary and exported to Prometheus (with alert rules for low live precision and a growing backlog), and the decided cases are exported as labelled examples for retraining. Because analysts only label alerted transactions, chargeback labels for non-alerted transactions are combined with them before retraining. The runbook (docs/monitoring_runbook.md) describes promotion and rollback."));
 
 // -------------------------------------------------------- 10. management
 add(PAGEBREAK(), H1("10. Project Management, Quality and Reproducibility"));
@@ -353,7 +393,8 @@ add(BULLET("**Non-linearity decides the model family.** Boosted trees reach vali
 add(BULLET("**Simplicity as a selection principle.** Four boosted variants were within statistical noise; choosing the simplest reduced dependencies, artefact size and serving latency at no measurable cost."));
 add(BULLET("**Unsupervised detection alone is insufficient.** The Isolation Forest finds unusual transactions, not fraudulent ones (validation PR-AUC 0.36); its score added nothing measurable on top of the supervised model, but it remains a candidate detector for new, unlabelled patterns."));
 add(BULLET("**Operating point over metric.** The cost-based threshold, not the ranking metric, determines what the bank experiences; the dashboard makes that trade-off explicit."));
-add(BULLET("**Simulated data.** Sparkov's fraud patterns are cleaner than real ones, so absolute results are optimistic. The method, evaluation protocol and platform are what transfer."));
+add(BULLET("**Simulated data.** Sparkov's fraud patterns are cleaner than real ones, so absolute results are optimistic; at a real-world fraud rate of 0.1% the same recall and false-alarm rate would give about 40% precision (section 7.5). The method, evaluation protocol and platform are what transfer, and a shadow-mode trial on real transactions comes before any savings claim."));
+add(BULLET("**Estimated, not demonstrated, savings.** The net benefit rests on an assumed $15 review cost and 90% recovery rate; it ranks operating points but is not a measured saving."));
 add(BULLET("**Selective labels.** In production, analyst feedback only labels alerted transactions; chargeback labels for non-alerted transactions are needed to avoid biasing retraining."));
 add(BULLET("**Platform scale.** The Docker platform runs on one machine; the same components scale out (MinIO and ClickHouse clusters, Trino workers, NiFi cluster) without changing the pipeline code."));
 

@@ -14,9 +14,10 @@ PRT661 (Charles Darwin University), Theme 3: Anomaly Detection and Intelligent M
 | Data | Sparkov simulated card transactions (Kaggle `kartik2112/fraud-detection`, CC0): 1.85 M transactions, 2019-2020 |
 | Champion | HistGradientBoosting (scikit-learn), chosen by a pre-registered non-inferiority rule |
 | Test period (Jun-Dec 2020, never used for any choice) | **recall 0.962**, **precision 0.724**, **14.7 alerts/day**, PR-AUC 0.970 (251× the random baseline) |
-| Business impact (test) | 98.7% of fraud dollars caught; net benefit $964k after $15/alert review cost |
+| Business impact (test, estimate) | 98.7% of fraud dollars caught; **estimated** net benefit $964k, assuming $15 per review and 90% of caught fraud recovered (an estimate on simulated data, not demonstrated savings) |
 | Verification | 56/56 automated end-to-end checks pass (`reports/verification_report.json`) |
-| Data platform | runs end to end on a GitHub runner: 14/14 smoke checks pass, ClickHouse 14-23× faster than Trino with the same answers, OpenMetadata catalog with PII tags and lineage ([platform guide](docs/platform.md#latest-verified-run)) |
+| Live path | a new transaction → online features → model → case in the review queue → analyst decision → live-precision monitoring and new labels, behind role-based API keys and a dashboard sign-in ([user guide](docs/user_guide.md), [API](docs/api.md)) |
+| Data platform | runs end to end on a GitHub runner: 16/16 smoke checks pass (including access control and the live review path), ClickHouse 18-31× faster than Trino with the same answers, OpenMetadata catalog with PII tags and lineage ([platform guide](docs/platform.md#latest-verified-run)) |
 
 ## The lifecycle, stage by stage
 

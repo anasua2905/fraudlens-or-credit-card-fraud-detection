@@ -1,0 +1,240 @@
+{
+  "threshold": 0.739727,
+  "monthly": {
+    "months": [
+      {
+        "month": "2020-06",
+        "transactions": 30058,
+        "frauds": 133,
+        "alerts": 173,
+        "recall": 0.9699,
+        "recall_ci95": [
+          0.9252,
+          0.9882
+        ],
+        "precision": 0.7457,
+        "precision_ci95": [
+          0.6759,
+          0.8047
+        ],
+        "alerts_per_day": 18.2,
+        "pr_auc": 0.9774
+      },
+      {
+        "month": "2020-07",
+        "transactions": 85848,
+        "frauds": 321,
+        "alerts": 424,
+        "recall": 0.9439,
+        "recall_ci95": [
+          0.9131,
+          0.9642
+        ],
+        "precision": 0.7146,
+        "precision_ci95": [
+          0.6699,
+          0.7555
+        ],
+        "alerts_per_day": 13.7,
+        "pr_auc": 0.9589
+      },
+      {
+        "month": "2020-08",
+        "transactions": 88759,
+        "frauds": 415,
+        "alerts": 532,
+        "recall": 0.9687,
+        "recall_ci95": [
+          0.9471,
+          0.9816
+        ],
+        "precision": 0.7556,
+        "precision_ci95": [
+          0.7174,
+          0.7902
+        ],
+        "alerts_per_day": 17.2,
+        "pr_auc": 0.9744
+      },
+      {
+        "month": "2020-09",
+        "transactions": 69533,
+        "frauds": 340,
+        "alerts": 442,
+        "recall": 0.9588,
+        "recall_ci95": [
+          0.9321,
+          0.9753
+        ],
+        "precision": 0.7376,
+        "precision_ci95": [
+          0.6946,
+          0.7764
+        ],
+        "alerts_per_day": 14.7,
+        "pr_auc": 0.9735
+      },
+      {
+        "month": "2020-10",
+        "transactions": 69348,
+        "frauds": 384,
+        "alerts": 511,
+        "recall": 0.9661,
+        "recall_ci95": [
+          0.9429,
+          0.9801
+        ],
+        "precision": 0.726,
+        "precision_ci95": [
+          0.6858,
+          0.7629
+        ],
+        "alerts_per_day": 16.5,
+        "pr_auc": 0.9757
+      },
+      {
+        "month": "2020-11",
+        "transactions": 72635,
+        "frauds": 294,
+        "alerts": 404,
+        "recall": 0.9796,
+        "recall_ci95": [
+          0.9562,
+          0.9906
+        ],
+        "precision": 0.7129,
+        "precision_ci95": [
+          0.6669,
+          0.7548
+        ],
+        "alerts_per_day": 13.5,
+        "pr_auc": 0.9736
+      },
+      {
+        "month": "2020-12",
+        "transactions": 139538,
+        "frauds": 258,
+        "alerts": 365,
+        "recall": 0.9496,
+        "recall_ci95": [
+          0.9157,
+          0.9703
+        ],
+        "precision": 0.6712,
+        "precision_ci95": [
+          0.6215,
+          0.7174
+        ],
+        "alerts_per_day": 11.8,
+        "pr_auc": 0.9553
+      }
+    ],
+    "recall_range": [
+      0.9439,
+      0.9796
+    ],
+    "precision_range": [
+      0.6712,
+      0.7556
+    ],
+    "chi2_p_recall": 0.2778,
+    "chi2_p_precision": 0.173,
+    "checks": [
+      {
+        "check": "every month's recall >= the 85% floor",
+        "status": "PASS",
+        "detail": "lowest 0.944 (2020-07)"
+      },
+      {
+        "check": "every month's precision >= the 40% floor",
+        "status": "PASS",
+        "detail": "lowest 0.671 (2020-12)"
+      },
+      {
+        "check": "monthly recall differs no more than chance (chi-square p >= 0.05)",
+        "status": "PASS",
+        "detail": "p = 0.278"
+      },
+      {
+        "check": "monthly precision differs no more than chance (chi-square p >= 0.05)",
+        "status": "PASS",
+        "detail": "p = 0.173"
+      }
+    ],
+    "stable": true
+  },
+  "prevalence": {
+    "recall": 0.9622,
+    "false_positive_rate": 0.001422,
+    "test_fraud_rate_pct": 0.386,
+    "transactions_per_day": 2875.2,
+    "fpr_factors": [
+      1,
+      2,
+      5
+    ],
+    "rows": [
+      {
+        "fraud_rate_pct": 0.05,
+        "is_test_rate": false,
+        "precision_fpr_x1": 0.2529,
+        "alerts_per_day_fpr_x1": 5.5,
+        "precision_fpr_x2": 0.1448,
+        "alerts_per_day_fpr_x2": 9.6,
+        "precision_fpr_x5": 0.0634,
+        "alerts_per_day_fpr_x5": 21.8
+      },
+      {
+        "fraud_rate_pct": 0.1,
+        "is_test_rate": false,
+        "precision_fpr_x1": 0.4039,
+        "alerts_per_day_fpr_x1": 6.9,
+        "precision_fpr_x2": 0.253,
+        "alerts_per_day_fpr_x2": 10.9,
+        "precision_fpr_x5": 0.1193,
+        "alerts_per_day_fpr_x5": 23.2
+      },
+      {
+        "fraud_rate_pct": 0.2,
+        "is_test_rate": false,
+        "precision_fpr_x1": 0.5756,
+        "alerts_per_day_fpr_x1": 9.6,
+        "precision_fpr_x2": 0.4041,
+        "alerts_per_day_fpr_x2": 13.7,
+        "precision_fpr_x5": 0.2134,
+        "alerts_per_day_fpr_x5": 25.9
+      },
+      {
+        "fraud_rate_pct": 0.386,
+        "is_test_rate": true,
+        "precision_fpr_x1": 0.724,
+        "alerts_per_day_fpr_x1": 14.8,
+        "precision_fpr_x2": 0.5673,
+        "alerts_per_day_fpr_x2": 18.8,
+        "precision_fpr_x5": 0.3441,
+        "alerts_per_day_fpr_x5": 31.0
+      },
+      {
+        "fraud_rate_pct": 0.5,
+        "is_test_rate": false,
+        "precision_fpr_x1": 0.7728,
+        "alerts_per_day_fpr_x1": 17.9,
+        "precision_fpr_x2": 0.6297,
+        "alerts_per_day_fpr_x2": 22.0,
+        "precision_fpr_x5": 0.4048,
+        "alerts_per_day_fpr_x5": 34.2
+      },
+      {
+        "fraud_rate_pct": 1.0,
+        "is_test_rate": false,
+        "precision_fpr_x1": 0.8724,
+        "alerts_per_day_fpr_x1": 31.7,
+        "precision_fpr_x2": 0.7737,
+        "alerts_per_day_fpr_x2": 35.8,
+        "precision_fpr_x5": 0.5776,
+        "alerts_per_day_fpr_x5": 47.9
+      }
+    ],
+    "note": "Recall is held at the test value; real data may also lower it. Precision falls with rarer fraud and with more false alarms, which is why a shadow-mode trial on real transactions comes before any savings claim."
+  }
+}

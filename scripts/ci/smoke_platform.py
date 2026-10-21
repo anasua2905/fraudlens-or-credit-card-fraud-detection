@@ -180,6 +180,10 @@ def run(skip: set[str]) -> int:
 
     sample_txn: dict = {}
 
+    from fraudlens import security
+    keys = {role: key for key, role in security.parse_keys(env("FRAUDLENS_API_KEYS")).items()}
+    H = {r: ({"X-API-Key": keys[r]} if r in keys else {}) for r in ("scorer", "analyst")}
+
     @check("api", "scoring API is healthy and scores a transaction", retries=12, wait=10)
     def _():
         base = "http://localhost:8000"
@@ -187,13 +191,39 @@ def run(skip: set[str]) -> int:
         spec = requests.get(f"{base}/openapi.json", timeout=10).json()
         txn = spec["components"]["schemas"]["Transaction"]["examples"][0]
         sample_txn.update(txn)
-        r = requests.post(f"{base}/score", json=txn, params={"update_state": "false"}, timeout=10)
+        r = requests.post(f"{base}/score", json=txn, params={"update_state": "false"}, headers=H["scorer"], timeout=10)
         r.raise_for_status()
         out = r.json()
-        assert 0 <= out["score"] <= 1 and out["alert"] == (out["score"] >= out["threshold"])
-        fb = requests.post(f"{base}/feedback", json={"transaction_id": "smoke-1", "label": "fraud"}, timeout=10)
-        assert fb.json()["status"] == "recorded"
-        return {k: out[k] for k in ("score", "alert", "threshold", "model", "reasons")}
+        assert 0 <= out["score"] <= 1 and out["alert"] == (out["score"] >= out["threshold"]) and out["case_id"]
+        fb = requests.post(f"{base}/feedback", json={"transaction_id": "smoke-1", "label": "fraud"},
+                           headers=H["analyst"], timeout=10)
+        assert fb.json()["status"] == "recorded", fb.text
+        return {k: out[k] for k in ("score", "alert", "threshold", "model", "reasons", "routed_to")}
+
+    @check("api", "access control: no key is refused, a scorer cannot review", retries=3, wait=5)
+    def _():
+        base = "http://localhost:8000"
+        health = requests.get(f"{base}/health", timeout=10).json()
+        assert health["access_control"] == "api-keys", health
+        assert requests.post(f"{base}/score", json=sample_txn, timeout=10).status_code == 401
+        assert requests.get(f"{base}/alerts", headers=H["scorer"], timeout=10).status_code == 403
+        return "401 without a key; 403 for the wrong role"
+
+    @check("api", "a new alert reaches the review queue and its decision reaches monitoring", retries=3, wait=5)
+    def _():
+        base = "http://localhost:8000"
+        big = {**sample_txn, "amount": 4999.0, "transaction_id": "smoke-alert"}
+        r = requests.post(f"{base}/score", json=big, headers=H["scorer"], timeout=20).json()
+        case_id = r["case_id"]
+        if r["alert"]:
+            queue = requests.get(f"{base}/alerts", headers=H["analyst"], timeout=10).json()
+            assert case_id in [q["case_id"] for q in queue], "alert is not in the review queue"
+        d = requests.post(f"{base}/alerts/{case_id}/decision", json={"label": "fraud", "analyst": "smoke"},
+                          headers=H["analyst"], timeout=10).json()
+        assert d["case"]["status"] == "closed", d
+        fb = requests.get(f"{base}/monitoring/feedback", headers=H["analyst"], timeout=10).json()
+        assert fb["labelled_examples"] >= 1 and (fb["reviewed_alerts"] >= 1 or not r["alert"]), fb
+        return {"case": case_id, "alert": r["alert"], "reviewed": fb["reviewed_alerts"], "verdict": fb["verdict"]}
 
     @check("monitoring", "Prometheus scrapes the API", retries=12, wait=10)
     def _():

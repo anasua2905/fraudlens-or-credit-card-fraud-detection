@@ -34,7 +34,9 @@ earlier history), produce a score *s(x)* such that ranking by *s* puts fraud fir
 net benefit = 0.9 × (fraud $ in alerts) − 15 × (number of alerts)
 ```
 
-on the validation period. Constraints: no information from the future (chronological split, prior-only
+on the validation period. The $15 review cost and the 90% recovery rate are **assumptions** (config
+`model.threshold`), so every money figure the project reports is an estimate under them, not a measured saving.
+Constraints: no information from the future (chronological split, prior-only
 features), interpretable alerts, a daily alert volume a small team can clear.
 
 ## Success criteria (set before modelling, checked on the untouched test period)

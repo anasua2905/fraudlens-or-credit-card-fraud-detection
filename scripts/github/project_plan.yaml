@@ -190,7 +190,7 @@ issues:
     body: |
       - [x] Workflows written (`deploy/github/workflows/`)
       - [x] Installed in `.github/workflows`
-      - [x] Platform workflow green on the runner (14/14 smoke checks)
+      - [x] Platform workflow green on the runner (16/16 smoke checks)
   - title: "Deploy the anomaly detection system"
     stage: 7-deployment
     milestone: 3
@@ -251,3 +251,48 @@ issues:
       - [x] Trino access rules: allow `sync_partition_metadata` for the pipeline
       - [x] Crawler registers each table independently and reports failures
       - [x] CI steps report errors and results as run annotations
+  # ---------------- supervisor feedback on the previous submission
+  - title: "Feedback: a new transaction from feature generation to an analyst decision"
+    stage: 7-deployment
+    milestone: 3
+    type: feature
+    status: done
+    priority: high
+    body: |
+      - [x] Case store: every scored transaction stored with features, score, threshold, explanation (`casework.py`)
+      - [x] Review queue and decisions: API `/alerts`, `/alerts/{id}/decision`; dashboard Live transaction + Case review tabs
+      - [x] Audit log with the analyst's name; end-to-end test and platform smoke check
+  - title: "Feedback: analyst decisions inform monitoring"
+    stage: 8-monitoring
+    milestone: 3
+    type: feature
+    status: done
+    body: |
+      - [x] Live precision with Wilson 95% CI vs the floor; misses on approved transactions; backlog; time to decision
+      - [x] `/monitoring/feedback`, Prometheus gauges and alert rules, Grafana panels, monitoring summary block
+      - [x] Decided cases exported as labelled examples for retraining
+  - title: "Feedback: present the financial benefit as an estimate under stated assumptions"
+    stage: 6-evaluation
+    milestone: 4
+    type: docs
+    status: done
+    body: |
+      - [x] Dashboard, report, deck, README and model card say "estimated net benefit" with the $15 / 90% assumptions
+  - title: "Feedback: monthly stability, transferability and stronger explanations"
+    stage: 6-evaluation
+    milestone: 2
+    type: analysis
+    status: done
+    body: |
+      - [x] Monthly Wilson intervals, floor checks, chi-square test (`stability.py`)
+      - [x] Precision and alert volume at other fraud rates and false-alarm rates; validation checklist
+      - [x] SHAP faithfulness (deletion test, seed stability, additivity) and counterfactual amounts (`explain_quality.py`)
+  - title: "Feedback: deployment access controls"
+    stage: 7-deployment
+    milestone: 3
+    type: infra
+    status: done
+    priority: high
+    body: |
+      - [x] Role-based API keys (scorer, analyst, admin), 401/403, refused calls in Prometheus
+      - [x] Dashboard sign-in (analyst, viewer); public links switch access control on automatically

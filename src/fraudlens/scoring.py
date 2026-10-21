@@ -135,6 +135,8 @@ class FraudScorer:
             "reasons": rule_reasons(feats, self.category_risk) if alert else [],
             "features": {k: (None if isinstance(v, float) and np.isnan(v) else v) for k, v in feats.items()},
         }
+        if alert:
+            out["clear_below_amount"] = self.amount_to_clear(txn, score)
         if self.explainer is not None:
             try:
                 contrib = self.explainer.top_contributions(self.model.transform(frame), k=5)[0]
@@ -147,3 +149,22 @@ class FraudScorer:
         if update_state:
             self.store.update(txn)
         return out
+
+    def amount_to_clear(self, txn: dict, score: float | None = None, iterations: int = 18) -> float | None:
+        """Counterfactual for an alert: an amount below the actual one at which this transaction, with the
+        same card history, time and merchant, would have been approved (bisection between $1 and the amount;
+        the score need not be monotone in the amount, so this is one approving amount, not a guarantee for
+        every smaller one). None if even $1 would still alert (the pattern, not the amount, drives it)."""
+        def s(a: float) -> float:
+            return float(self.model.predict(pd.DataFrame([self.store.features({**txn, "amount": a})]))[0])
+        hi = float(txn["amount"])
+        lo = 1.0
+        if hi <= lo or s(lo) >= self.model.threshold:
+            return None
+        for _ in range(iterations):
+            mid = (lo + hi) / 2
+            if s(mid) >= self.model.threshold:
+                hi = mid
+            else:
+                lo = mid
+        return round(lo, 2)

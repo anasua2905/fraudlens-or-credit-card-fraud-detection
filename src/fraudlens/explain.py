@@ -41,7 +41,8 @@ class Explainer:
     output is used instead, which is model-agnostic and additive by design.
     """
 
-    def __init__(self, fm: FraudModel, background: pd.DataFrame | None = None, permutations: int = 3):
+    def __init__(self, fm: FraudModel, background: pd.DataFrame | None = None, permutations: int = 3,
+                 seed: int = 0):
         import shap
         self.shap = shap
         self.fm = fm
@@ -70,7 +71,7 @@ class Explainer:
             masker = shap.maskers.Independent(bg, max_samples=len(bg))
             self.explainer = shap.PermutationExplainer(lambda X: log_odds(fm.model, pd.DataFrame(X, columns=bg.columns)
                                                                           .astype(bg.dtypes.to_dict())),
-                                                       masker, seed=0)
+                                                       masker, seed=seed)
             self.max_evals = 2 * permutations * bg.shape[1] + 1
             self.kind = "permutation"
             self.base_value = float(log_odds(fm.model, bg).mean())
