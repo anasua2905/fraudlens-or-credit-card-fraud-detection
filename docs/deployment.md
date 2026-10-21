@@ -75,6 +75,27 @@ cd platform && docker compose --profile lake --profile ingest --profile olap --p
 
 The `api` service mounts `dashboard/bundle`; Prometheus scrapes it and Grafana shows the operations dashboard.
 
+## Access control
+
+| Service | Mechanism | Configure |
+|---|---|---|
+| Scoring API | role-based API keys in the `X-API-Key` header: `scorer` (score), `analyst` (review queue, decisions, feedback monitoring), `admin` | `FRAUDLENS_API_KEYS="scorer:<key>,analyst:<key>,admin:<key>"`; generate with `python -m fraudlens.security keys` |
+| Dashboard | sign-in with named users; `analyst` may record decisions, `viewer` may only explore | `FRAUDLENS_DASHBOARD_USERS="alice:analyst:<password or pbkdf2 hash>,bob:viewer:<...>"`, or `[users]` in Streamlit secrets; hash with `python -m fraudlens.security hash` |
+| Audit | every scoring call and decision in the case store's `audit` table (who, role, when, what) | `FRAUDLENS_CASE_DB` (default `data/cases/cases.db`) |
+| Network | API and dashboard bind to 127.0.0.1; only the tunnels expose them; `/health` and `/metrics` carry no transaction data | `run_local.ps1` |
+
+`run_local.ps1 -Public` (and `-Secure` without tunnels) turns access control on automatically: it generates the
+keys and two dashboard accounts once, keeps them in `data\deploy\access.json` (not committed) and prints them.
+In Docker Compose the API reads `FRAUDLENS_API_KEYS` from `platform/.env`. Without these settings the services run
+in development mode with access control off, and `/health` and the dashboard sidebar say so. For Streamlit
+Community Cloud, put the users in the app's secrets:
+
+```toml
+[users.alice]
+role = "analyst"
+password = "pbkdf2$..."      # python -m fraudlens.security hash
+```
+
 ## Release checklist
 
 1. Pipeline run complete; `reports/verification_report.json` status **PASS**.

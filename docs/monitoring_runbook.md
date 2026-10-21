@@ -14,6 +14,10 @@ What to watch, what each alert means, and how to retrain and promote a model saf
 | API availability | Prometheus `up` | continuous | down for 1 min (`FraudLensApiDown`, critical) |
 | Monitoring verdict | `fraudlens_monitoring_retrain_recommended` gauge | after each monitoring run | = 1 for 5 min (`FraudLensRetrainRecommended`) |
 | Cold-start share | `fraudlens_unknown_card_total` | continuous | review if it rises sharply (new portfolio, data issue) |
+| Live precision (analyst-confirmed share of reviewed alerts) | case store → `/monitoring/feedback`, `fraudlens_live_precision` | continuous | 95% interval wholly below 0.40 with ≥ 20 decisions → threshold/model review (`FraudLensLivePrecisionLow`) |
+| Review backlog | `fraudlens_open_alerts` | continuous | > 100 open alerts for 1 h (`FraudLensReviewBacklog`) |
+| Monthly stability | `reports/stability.json` (`python -m fraudlens.stability`) | monthly | any month below a floor, or chi-square p < 0.05 between months |
+| Refused requests | `fraudlens_access_denied_total` | continuous | > 20 in 15 min (`FraudLensAccessDenied`) |
 
 Dashboards: Grafana *FraudLens - operations* (Prometheus) and *FraudLens - Business analytics* (ClickHouse);
 the Streamlit **Monitoring** tab; MLflow (monitoring runs, one step per month).
@@ -64,10 +68,27 @@ alias back to the previous version and rebuild the bundle.
 | `FraudLensSlowScoring` | CPU load, batch sizes on `/score/batch` | scale out the API (more replicas) or disable live SHAP contributions |
 | `FraudLensAlertRateSpike` | Grafana score distribution; recent deploys; category mix | an attack in progress (escalate to fraud ops) or an input-data problem (check upstream) |
 | `FraudLensRetrainRecommended` | `reports/monitoring/summary.json → reasons` | follow sections 2-3 |
+| `FraudLensLivePrecisionLow` | Case review tab: which categories and score bands are being rejected | raise the threshold temporarily (Threshold & cost tab shows the trade-off), then retrain with the new labels |
+| `FraudLensReviewBacklog` | alert rate, analyst staffing | add reviewers or move to the alert-budget operating point |
+| `FraudLensAccessDenied` | API logs: which endpoint, which key id | rotate the key if it leaked; fix the client's configuration |
 
-## 5. Feedback loop
+## 5. Feedback loop: how analyst decisions inform monitoring
 
-Analysts' verdicts arrive at `POST /feedback` (and from the dashboard's Alert queue) and are appended to the
-feedback file. They are the fastest source of labels, but only for alerted transactions; combine them with
-chargeback labels for non-alerted transactions before retraining, otherwise the training data becomes biased
-towards what the old model already flagged.
+Every transaction scored by the API or the dashboard is stored as a **case** (`fraudlens.casework`, SQLite at
+`data/cases/cases.db`): its features, score, threshold, reasons and SHAP contributions, exactly as the model saw
+them. An alert opens the case in the review queue; the analyst records *fraud* or *legitimate* with a note (API
+`POST /alerts/{id}/decision`, or the dashboard's **Case review** tab), which closes it and writes an audit entry
+with the analyst's name. A dispute on an approved transaction (`POST /feedback`) labels that case as a miss.
+
+The decisions are used in three places:
+
+1. **Live performance.** `CaseStore.feedback_summary()` gives live precision (confirmed ÷ reviewed alerts) with a
+   Wilson 95% interval, missed fraud reported on approved transactions, the open backlog and the time to decision.
+   The API exports them to Prometheus; `python -m fraudlens.monitor` writes them into
+   `reports/monitoring/summary.json → analyst_feedback` and turns a `review_threshold` verdict into a retraining
+   recommendation (`live_flags`).
+2. **Retraining data.** The same run exports `reports/monitoring/labelled_feedback.csv`: the model inputs of every
+   decided case with its label. Combine it with chargeback labels for non-alerted transactions before retraining;
+   alert-only labels would bias the training data towards what the old model already flagged.
+3. **Threshold review.** Live precision far from the validation estimate means the operating point no longer
+   balances cost and catch rate; re-run the threshold choice on recent labelled data.

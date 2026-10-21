@@ -4,12 +4,17 @@ both from the project's virtual environment. With -Public, each is also publishe
 Cloudflare quick tunnel (a temporary https://*.trycloudflare.com address, no account needed).
 
     powershell -ExecutionPolicy Bypass -File scripts\deploy\run_local.ps1            # local only
-    powershell -ExecutionPolicy Bypass -File scripts\deploy\run_local.ps1 -Public    # + public links
+    powershell -ExecutionPolicy Bypass -File scripts\deploy\run_local.ps1 -Public    # + public links (access control on)
+    powershell -ExecutionPolicy Bypass -File scripts\deploy\run_local.ps1 -Secure    # local, access control on
     powershell -ExecutionPolicy Bypass -File scripts\deploy\stop_local.ps1           # stop everything
+
+Access control (always with -Public): the API requires role-based keys (X-API-Key) and the dashboard a
+sign-in (an analyst and a viewer account). Keys and passwords are generated once, kept in
+data\deploy\access.json (not committed) and printed at the end. Analyst decisions go to data\cases\cases.db.
 
 Logs and the running state are written to data\deploy\ (not committed).
 #>
-param([switch]$Public, [int]$ApiPort = 8000, [int]$DashboardPort = 8501)
+param([switch]$Public, [switch]$Secure, [int]$ApiPort = 8000, [int]$DashboardPort = 8501)
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $py = Join-Path $root ".venv\Scripts\python.exe"
@@ -17,11 +22,32 @@ if (-not (Test-Path $py)) { throw "No virtual environment at $py. Create it firs
 $state = Join-Path $root "data\deploy"
 New-Item -ItemType Directory -Force $state | Out-Null
 
+function New-Secret([int]$n = 20) {
+    $chars = [char[]]"ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789"
+    $bytes = New-Object byte[] $n
+    (New-Object System.Security.Cryptography.RNGCryptoServiceProvider).GetBytes($bytes)    # works on Windows PowerShell 5.1
+    -join ($bytes | ForEach-Object { $chars[$_ % $chars.Length] })
+}
+$envSet = ""
+$access = $null
+if ($Public -or $Secure) {
+    $accessFile = Join-Path $state "access.json"
+    if (Test-Path $accessFile) { $access = Get-Content $accessFile -Raw | ConvertFrom-Json }
+    else {
+        $access = [ordered]@{ api_keys = [ordered]@{ scorer = (New-Secret 32); analyst = (New-Secret 32); admin = (New-Secret 32) }
+                              dashboard = [ordered]@{ analyst = (New-Secret 14); viewer = (New-Secret 14) } }
+        $access | ConvertTo-Json | Set-Content -Path $accessFile -Encoding ascii
+    }
+    $keys = "scorer:$($access.api_keys.scorer),analyst:$($access.api_keys.analyst),admin:$($access.api_keys.admin)"
+    $users = "analyst:analyst:$($access.dashboard.analyst),viewer:viewer:$($access.dashboard.viewer)"
+    $envSet = "set `"FRAUDLENS_API_KEYS=$keys`"&& set `"FRAUDLENS_DASHBOARD_USERS=$users`"&& "
+}
+
 function Start-Bg($name, $file, $arguments) {
     # Started through WMI so the process outlives this script (and any job that runs it);
     # cmd.exe redirects the output to data\deploy\<name>.log.
     $log = Join-Path $state "$name.log"
-    $cmd = "cmd.exe /c `"set PYTHONUTF8=1&& set MLFLOW_DISABLE_AGENT_HINT=1&& `"$file`" $arguments > `"$log`" 2>&1`""
+    $cmd = "cmd.exe /c `"set PYTHONUTF8=1&& set MLFLOW_DISABLE_AGENT_HINT=1&& $envSet`"$file`" $arguments > `"$log`" 2>&1`""
     $hidden = New-CimInstance -ClassName Win32_ProcessStartup -ClientOnly -Property @{ ShowWindow = [uint16]0 }
     $r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create `
         -Arguments @{ CommandLine = $cmd; CurrentDirectory = $root; ProcessStartupInformation = $hidden }
@@ -67,6 +93,13 @@ if ($Public) {
     }
     if ($info["tunnel_api_url"]) { $info["api_public_docs"] = $info["tunnel_api_url"] + "/docs" }
 }
+$info.access_control = if ($access) { "on (keys and passwords in data\deploy\access.json)" } else { "off (local development)" }
 $info.pids = $pids
 $info | ConvertTo-Json | Set-Content -Path (Join-Path $state "deployment.json") -Encoding ascii
 $info | ConvertTo-Json
+if ($access) {
+    Write-Host ""
+    Write-Host "Dashboard sign-in:  analyst / $($access.dashboard.analyst)    viewer / $($access.dashboard.viewer)"
+    Write-Host "API keys (X-API-Key header): scorer $($access.api_keys.scorer)"
+    Write-Host "                             analyst $($access.api_keys.analyst)"
+}

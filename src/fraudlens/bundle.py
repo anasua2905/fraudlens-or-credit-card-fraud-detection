@@ -38,7 +38,7 @@ SCORED_COLUMNS = ["transaction_id", "ts", "card_id", "merchant", "category", "am
 REPORTS = ["model_results.json", "dashboard_meta.json", "explanations.json", "verification_report.json",
            "pipeline_run.json", "validation_report.json", "cleaning_audit.json", "preprocessing_report.json",
            "acquisition_manifest.json", "acquisition_metadata.json", "eda_summary.json", "data_catalog.json",
-           "lake_publication.json"]
+           "lake_publication.json", "explanation_quality.json", "stability.json", "fairness.json"]
 MONITORING = ["summary.json", "monthly.csv", "feature_drift.csv"]
 FIGURE_PREFIXES = ("0", "1")
 MAX_BUNDLE_MB = 95

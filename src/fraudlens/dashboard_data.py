@@ -28,7 +28,8 @@ REPORT_FILES = {
     "verification": "verification_report.json", "explanations": "explanations.json",
     "pipeline": "pipeline_run.json", "validation": "validation_report.json", "eda": "eda_summary.json",
     "catalog": "data_catalog.json", "lake": "lake_publication.json", "acquisition": "acquisition_manifest.json",
-    "cleaning": "cleaning_audit.json",
+    "cleaning": "cleaning_audit.json", "explanation_quality": "explanation_quality.json",
+    "stability": "stability.json",
 }
 
 
@@ -255,10 +256,10 @@ def summary_markdown(k: dict, filters: dict, meta: dict, top_categories: pd.Data
         f"| Precision | {k['precision']:.1%} |",
         f"| Recall | {k['recall']:.1%} |",
         f"| False alarms per catch | {k['false_alarms_per_catch']} |",
-        f"| Fraud value recovered | ${k['fraud_amount_caught']:,.0f} |",
+        f"| Fraud value recovered (estimate) | ${k['fraud_amount_caught']:,.0f} |",
         f"| Fraud value missed | ${k['fraud_amount_missed']:,.0f} |",
-        f"| Review cost | ${k['review_cost']:,.0f} |",
-        f"| Net benefit | ${k['net_benefit']:,.0f} |",
+        f"| Review cost (estimate) | ${k['review_cost']:,.0f} |",
+        f"| Estimated net benefit | ${k['net_benefit']:,.0f} |",
         "",
         "## Categories with the most false alerts",
         "",
@@ -267,5 +268,7 @@ def summary_markdown(k: dict, filters: dict, meta: dict, top_categories: pd.Data
     for _, r in top_categories.head(5).iterrows():
         prec = "n/a" if pd.isna(r["precision"]) else f"{r['precision']:.1%}"
         lines.append(f"| {r['category']} | {int(r['alerts'])} | {int(r['caught'])} | {int(r['false_alert'])} | {prec} |")
-    lines += ["", f"_Assumptions: review cost ${filters['cost']} per alert, recovery rate {filters['recovery']:.0%}._"]
+    lines += ["", f"_The financial figures are estimates, not realised savings: they assume a review cost of "
+                  f"${filters['cost']:,.2f} per alert and that {filters['recovery']:.0%} of the value of caught fraud is "
+                  f"recovered, on simulated (Sparkov) transactions. Real savings need a trial on real transactions._"]
     return "\n".join(lines)

@@ -1,5 +1,5 @@
 {
-  "built_at": "2026-10-18T09:49:08",
+  "built_at": "2026-10-21T15:25:56",
   "champion": "hist_gb",
   "rows_scored": 667300,
   "total_mb": 40.3,
@@ -156,14 +156,34 @@
       "sha256": "f1a1427c63b7081dba1a8bfdf17953ad34f782ccdbf7dd9f38eb32d9b41b1173"
     },
     {
+      "file": "reports/data_catalog.json",
+      "bytes": 179,
+      "sha256": "5e77eb6f7b65f124637408932d93c6b246c5f660c072b938bf695216eeb3949d"
+    },
+    {
       "file": "reports/eda_summary.json",
       "bytes": 34381,
       "sha256": "88ff57855e91c7fa88dc0bd85b1f31e35884f0296dd4509af62e2d7325bae33f"
     },
     {
+      "file": "reports/explanation_quality.json",
+      "bytes": 754,
+      "sha256": "79eba81ea7096987b214f77706b611dea369945907ff75162e0ae9454472ea1b"
+    },
+    {
       "file": "reports/explanations.json",
       "bytes": 1956,
       "sha256": "8de6b2c187f984dcde8c88db97a4c44586fdcc6b765817afc99e89bd8b9f4449"
+    },
+    {
+      "file": "reports/fairness.json",
+      "bytes": 1317,
+      "sha256": "1f3f66847050123d21e8e6f9aa4e5b7456c65287ad8309b03d736417a9394560"
+    },
+    {
+      "file": "reports/lake_publication.json",
+      "bytes": 147,
+      "sha256": "ff34e0a78c5855e83e84131b35e1cddb5b05c5f6e3352b6110f1ed911e8804d4"
     },
     {
       "file": "reports/model_results.json",
@@ -194,6 +214,11 @@
       "file": "reports/preprocessing_report.json",
       "bytes": 4238,
       "sha256": "92975c8bd216abc53c66960d6f9d7981e3bdb7b6500576088725da7a2910a454"
+    },
+    {
+      "file": "reports/stability.json",
+      "bytes": 6053,
+      "sha256": "d672252470989fc275ca4a226fd42f723a5c21b8870a0b9a86475dd355d93a32"
     },
     {
       "file": "reports/validation_report.json",

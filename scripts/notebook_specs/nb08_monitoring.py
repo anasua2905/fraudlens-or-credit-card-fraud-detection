@@ -52,6 +52,40 @@ if (P["figures"] / "19_monitoring_monthly.png").exists():
     display(Image(filename=str(P["figures"] / "19_monitoring_monthly.png"), width=800))
 """),
 ("md", r"""
+### 8.1.1 Is the monthly performance stable, or just noisy?
+
+Each month has only 130 to 400 frauds, so a monthly recall is itself uncertain. `fraudlens.stability` adds a
+Wilson 95% interval to every month, checks each month against the policy floors, and tests with a chi-square
+test whether the months differ more than chance would allow.
+"""),
+("code", r"""
+from fraudlens.stability import run_stability
+stab = run_stability(cfg)
+m = pd.DataFrame(stab["monthly"]["months"])
+fig = go.Figure()
+for name, col, color in [("recall", "recall", viz.SERIES[0]), ("precision", "precision", viz.SERIES[1])]:
+    ci = np.array(m[f"{col}_ci95"].tolist())
+    fig.add_trace(go.Scatter(x=m["month"], y=m[col], name=name, mode="lines+markers", line_color=color,
+                             error_y=dict(type="data", symmetric=False, array=ci[:, 1] - m[col], arrayminus=m[col] - ci[:, 0])))
+fig.add_hline(y=summ["policy"]["recall_floor"], line_dash="dash", line_color=viz.MUTED)
+fig.add_hline(y=summ["policy"]["precision_floor"], line_dash="dot", line_color=viz.MUTED)
+fig.update_layout(template=viz.plotly_template(), height=360, yaxis_range=[0.3, 1.02],
+                  title="Monthly recall and precision with 95% Wilson intervals (test period)")
+fig.show()
+pd.DataFrame(stab["monthly"]["checks"])
+"""),
+("md", r"""
+### 8.1.2 How far would these numbers transfer to real transactions?
+
+The data are simulated. Precision depends on how common fraud is and on how many false alarms real
+customers trigger, so the test recall and false-positive rate are carried over to other conditions:
+"""),
+("code", r"""
+pv = pd.DataFrame(stab["prevalence"]["rows"])
+print(stab["prevalence"]["note"])
+pv[["fraud_rate_pct", "is_test_rate", "precision_fpr_x1", "alerts_per_day_fpr_x1", "precision_fpr_x2", "precision_fpr_x5"]]
+"""),
+("md", r"""
 ## 8.2 Which features drift?
 
 Per-feature PSI per month (0.1-0.25 = moderate, > 0.25 = major) with Evidently's drift verdicts.
@@ -194,7 +228,10 @@ else:
 ## 8.7 The improvement loop
 
 ```
- live traffic ─► /score ─► alerts ─► analyst verdicts (/feedback) ─┐
+ live traffic ─► /score ─► case ─► review queue ─► analyst decision ─► audit log
+                    │                                        │
+                    │                                        ├─► live precision vs floor (/monitoring/feedback)
+                    │                                        └─► labelled examples ─┐
                     │                                              ▼
                     └─► /metrics ─► Prometheus alert rules    labelled outcomes
                                                                    │
@@ -204,6 +241,9 @@ else:
         └─► promote: MLflow registry alias `champion`, rebuild the bundle, redeploy the image
 ```
 
+* Analyst decisions are stored with the exact model inputs (`fraudlens.casework`); `python -m fraudlens.monitor`
+  adds live precision, backlog and time to decision to the summary and exports the decided cases as labelled
+  examples. A whole 95% interval of live precision below the floor raises a threshold/model review.
 * `python -m fraudlens.monitor --retrain-if-needed` automates the retraining step when the policy fires.
 * The rule for promotion is the same non-inferiority test used for selection, so a retrained model only
   replaces the champion when it is not worse on the latest labelled period.

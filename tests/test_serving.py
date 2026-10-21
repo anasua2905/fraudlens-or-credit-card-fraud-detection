@@ -58,9 +58,55 @@ def client(project, monkeypatch_module):
     from fastapi.testclient import TestClient
     monkeypatch_module.setenv("FRAUDLENS_MODEL_DIR", str(project["root"] / "dashboard" / "bundle"))
     monkeypatch_module.setenv("FRAUDLENS_FEEDBACK_FILE", str(project["root"] / "feedback.csv"))
+    monkeypatch_module.setenv("FRAUDLENS_CASE_DB", str(project["root"] / "cases_dev.db"))
+    monkeypatch_module.delenv("FRAUDLENS_API_KEYS", raising=False)
     import fraudlens.api as api
     api = importlib.reload(api)
     return TestClient(api.app), api
+
+
+def test_new_transaction_flows_to_a_decision_and_into_monitoring(project, monkeypatch_module):
+    """The complete live path: transaction -> features -> score -> case -> analyst decision -> monitoring,
+    behind role-based API keys."""
+    pytest.importorskip("fastapi")
+    from fastapi.testclient import TestClient
+    monkeypatch_module.setenv("FRAUDLENS_MODEL_DIR", str(project["root"] / "dashboard" / "bundle"))
+    monkeypatch_module.setenv("FRAUDLENS_CASE_DB", str(project["root"] / "cases_auth.db"))
+    monkeypatch_module.setenv("FRAUDLENS_API_KEYS", "scorer:s-key,analyst:a-key,admin:x-key")
+    import fraudlens.api as api
+    api = importlib.reload(api)
+    c = TestClient(api.app)
+    from fraudlens.runtime import example_transaction
+    txn = {**example_transaction(api.RT.store), "amount": 2500.0, "transaction_id": "live-1"}
+
+    assert c.get("/health").json()["access_control"] == "api-keys"
+    assert c.post("/score", json=txn).status_code == 401                                  # no key
+    assert c.post("/score", json=txn, headers={"X-API-Key": "a-key"}).status_code == 403  # analyst can't score
+    r = c.post("/score", json=txn, params={"include_features": True}, headers={"X-API-Key": "s-key"}).json()
+    assert r["case_id"] and r["features"]["amount"] == 2500.0
+    assert r["routed_to"] == ("review queue" if r["alert"] else "approved")
+    assert c.get("/alerts", headers={"X-API-Key": "s-key"}).status_code == 403           # scorer can't review
+
+    # force a known alert so the review path is exercised whatever the model says about this card
+    case_id = api.CASES.record_scored({**r, "alert": True, "transaction_id": "live-2"}, txn, source="test")
+    queue = c.get("/alerts", headers={"X-API-Key": "a-key"}).json()
+    assert case_id in {q["case_id"] for q in queue} and all(q["status"] == "open" for q in queue)
+    case = c.get(f"/alerts/{case_id}", headers={"X-API-Key": "a-key"}).json()
+    assert case["features"] and case["threshold"] == r["threshold"]
+    d = c.post(f"/alerts/{case_id}/decision", json={"label": "fraud", "analyst": "alice", "note": "confirmed"},
+               headers={"X-API-Key": "a-key"}).json()
+    assert d["case"]["status"] == "closed" and d["case"]["decision"] == "fraud"
+    assert c.post("/alerts/nope/decision", json={"label": "fraud", "analyst": "a"},
+                  headers={"X-API-Key": "a-key"}).status_code == 404
+
+    fb = c.get("/monitoring/feedback", headers={"X-API-Key": "a-key"}).json()
+    assert fb["reviewed_alerts"] >= 1 and fb["confirmed_fraud"] >= 1 and fb["labelled_examples"] >= 1
+    assert "alice" in fb["analysts"] and fb["verdict"] == "insufficient"
+    audit = api.CASES.audit_log()
+    assert {"scored", "decided"} <= set(audit["action"]) and "alice" in set(audit["actor"])
+    m = c.get("/metrics").text
+    assert "fraudlens_open_alerts" in m and "fraudlens_access_denied_total" in m
+    monkeypatch_module.delenv("FRAUDLENS_API_KEYS")
 
 
 @pytest.fixture(scope="module")
@@ -102,3 +148,21 @@ def test_serving_path_does_not_need_the_plotting_stack():
             "bad = [m for m in ('seaborn', 'matplotlib') if m in sys.modules]; print(bad); sys.exit(1 if bad else 0)")
     r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
     assert r.returncode == 0, r.stdout + r.stderr
+
+
+def test_explanations_are_faithful_and_alerts_have_a_counterfactual(project):
+    from fraudlens.explain_quality import run_explain_quality
+    q = run_explain_quality(project["cfg"], n_alerts=25)
+    d = q["deletion"]
+    assert q["alerts_sampled"] > 0 and d["mean_score_drop_top_k"] >= d["mean_score_drop_random_k"]
+    assert 0 <= q["stability"]["mean_top_k_jaccard"] <= 1 and q["verdict"] in ("faithful", "weak")
+
+
+def test_monthly_stability_and_prevalence(project):
+    from fraudlens.stability import run_stability
+    s = run_stability(project["cfg"])
+    assert len(s["monthly"]["months"]) >= 1 and len(s["monthly"]["checks"]) == 4
+    rows = s["prevalence"]["rows"]
+    prec = [r["precision_fpr_x1"] for r in rows if not r["is_test_rate"]]
+    assert prec == sorted(prec)                       # rarer fraud -> lower precision
+    assert all(r["precision_fpr_x1"] >= r["precision_fpr_x5"] for r in rows)
