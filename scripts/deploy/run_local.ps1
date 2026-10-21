@@ -64,6 +64,8 @@ function Wait-Http($url, $seconds = 180) {
     return $false
 }
 
+# Make sure nothing from an earlier start still holds the ports or the log files.
+& (Join-Path $PSScriptRoot "stop_local.ps1") | Out-Null
 $pids = @{}
 $pids.api = Start-Bg "api" $py "-m uvicorn fraudlens.api:app --host 127.0.0.1 --port $ApiPort"
 $pids.dashboard = Start-Bg "dashboard" $py "-m streamlit run dashboard/app.py --server.port $DashboardPort --server.address 127.0.0.1 --server.headless true --browser.gatherUsageStats false"
@@ -92,6 +94,10 @@ if ($Public) {
         $info["${n}_url"] = $url
     }
     if ($info["tunnel_api_url"]) { $info["api_public_docs"] = $info["tunnel_api_url"] + "/docs" }
+}
+if ($apiOk) {
+    $h = (Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:$ApiPort/health" -TimeoutSec 10).Content | ConvertFrom-Json
+    $info.api_access_control_reported = $h.access_control
 }
 $info.access_control = if ($access) { "on (keys and passwords in data\deploy\access.json)" } else { "off (local development)" }
 $info.pids = $pids
